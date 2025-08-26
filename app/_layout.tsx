@@ -4,6 +4,7 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
+import { Text, View, StyleSheet } from "react-native";
 import Colors from "@/constants/colors";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { trpc, trpcClient } from "@/lib/trpc";
@@ -24,10 +25,9 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (error) {
-      console.error(error);
-      throw error;
+      console.error('Font loading error:', error);
     }
-  }, [loaded, error]);
+  }, [error]);
 
   useEffect(() => {
     if (loaded) {
@@ -35,17 +35,36 @@ export default function RootLayout() {
     }
   }, [loaded]);
 
+  if (error) {
+    return (
+      <View style={errorStyles.container}>
+        <Text style={errorStyles.text}>Error loading fonts</Text>
+        <Text style={errorStyles.details}>{error.message}</Text>
+      </View>
+    );
+  }
+
   if (!loaded) {
     return null;
   }
 
-  return (
-    <trpc.Provider client={trpcClient} queryClient={queryClient}>
-      <QueryClientProvider client={queryClient}>
-        <RootLayoutNav />
-      </QueryClientProvider>
-    </trpc.Provider>
-  );
+  try {
+    return (
+      <trpc.Provider client={trpcClient} queryClient={queryClient}>
+        <QueryClientProvider client={queryClient}>
+          <RootLayoutNav />
+        </QueryClientProvider>
+      </trpc.Provider>
+    );
+  } catch (err) {
+    console.error('App initialization error:', err);
+    return (
+      <View style={errorStyles.container}>
+        <Text style={errorStyles.text}>App initialization failed</Text>
+        <Text style={errorStyles.details}>{err instanceof Error ? err.message : 'Unknown error'}</Text>
+      </View>
+    );
+  }
 }
 
 function RootLayoutNav() {
@@ -77,3 +96,25 @@ function RootLayoutNav() {
     </>
   );
 }
+
+const errorStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: Colors.background,
+  },
+  text: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: Colors.primary,
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  details: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+  },
+});
