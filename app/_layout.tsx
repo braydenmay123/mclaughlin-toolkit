@@ -31,11 +31,32 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (loaded) {
-      SplashScreen.hideAsync();
+      SplashScreen.hideAsync().catch(console.error);
     }
   }, [loaded]);
 
+  // Add global error handler for web
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const handleError = (event: ErrorEvent) => {
+        console.error('Global error:', event.error);
+      };
+      const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+        console.error('Unhandled promise rejection:', event.reason);
+      };
+      
+      window.addEventListener('error', handleError);
+      window.addEventListener('unhandledrejection', handleUnhandledRejection);
+      
+      return () => {
+        window.removeEventListener('error', handleError);
+        window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+      };
+    }
+  }, []);
+
   if (error) {
+    console.error('Font error details:', error);
     return (
       <View style={errorStyles.container}>
         <Text style={errorStyles.text}>Error loading fonts</Text>
@@ -45,7 +66,11 @@ export default function RootLayout() {
   }
 
   if (!loaded) {
-    return null;
+    return (
+      <View style={errorStyles.container}>
+        <Text style={errorStyles.text}>Loading...</Text>
+      </View>
+    );
   }
 
   try {
