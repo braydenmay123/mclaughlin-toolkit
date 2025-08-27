@@ -318,21 +318,7 @@ export const generatePDFContent = (data: EmailData): string => {
 // Utility function to safely show alerts
 const showAlert = (title: string, message: string, buttons?: any[]) => {
   try {
-    // Try to use React Native Alert if available
-    if (typeof require !== 'undefined') {
-      try {
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const { Alert: RNAlert } = require('react-native');
-        if (RNAlert && RNAlert.alert) {
-          RNAlert.alert(title, message, buttons || [{ text: 'OK' }]);
-          return;
-        }
-      } catch {
-        // React Native not available, continue to web fallback
-      }
-    }
-    
-    // Web fallback
+    // Web fallback - just use console and window.alert
     if (typeof window !== 'undefined' && window.alert) {
       window.alert(`${title}\n\n${message}`);
     } else {
