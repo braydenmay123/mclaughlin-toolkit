@@ -1,9 +1,8 @@
 {
-  "buildCommand": "node build.js",
+  "buildCommand": "npx expo export -p web",
   "outputDirectory": "dist",
-  "devCommand": "npx expo start --web",
-  "installCommand": "npm install",
   "framework": null,
+  "cleanUrls": true,
   "functions": {
     "api/[...route].ts": {
       "runtime": "nodejs18.x"
@@ -15,8 +14,8 @@
       "destination": "/api/[...route]"
     },
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "source": "/:path*",
+      "destination": "/"
     }
   ]
 }
