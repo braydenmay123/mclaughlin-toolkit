@@ -1,5 +1,5 @@
 {
-  "buildCommand": "EXPO_DEBUG=1 EXPO_NO_TELEMETRY=1 npx expo export -p web --non-interactive --clear --verbose",
+  "buildCommand": "CI=1 EXPO_DEBUG=1 EXPO_NO_TELEMETRY=1 npx expo export -p web --clear",
   "outputDirectory": "dist",
   "framework": null
 }
