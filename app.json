@@ -25,7 +25,10 @@
       "package": "app.rork.home-buyers-planning-tool"
     },
     "web": {
-      "favicon": "./assets/images/favicon.png"
+  "bundler": "webpack",
+  "output": "static",
+  "favicon": "./assets/images/favicon.png"
+}
     },
     "plugins": [
       [
