@@ -3,19 +3,5 @@
   "outputDirectory": "dist",
   "framework": null,
   "cleanUrls": true,
-  "functions": {
-    "api/[...route].ts": {
-      "runtime": "nodejs18.x"
-    }
-  },
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/[...route]"
-    },
-    {
-      "source": "/:path*",
-      "destination": "/"
-    }
-  ]
+  "rewrites": [{ "source": "/:path*", "destination": "/" }]
 }
