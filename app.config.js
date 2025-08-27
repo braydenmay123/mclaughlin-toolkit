@@ -5,6 +5,7 @@ module.exports = {
     slug: "home-buyers-planning-tool",
     version: "1.0.0",
     orientation: "portrait",
+    platforms: ["ios", "android", "web"],
     icon: "./assets/images/icon.png",
     scheme: "myapp",
     userInterfaceStyle: "automatic",
