@@ -19,9 +19,12 @@ export const unstable_settings = {
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  console.log('RootLayout initializing...');
   const [loaded, error] = useFonts({
     ...FontAwesome.font,
   });
+  
+  console.log('Font loading state:', { loaded, error: error?.message });
 
   useEffect(() => {
     if (error) {
@@ -113,6 +116,7 @@ function RootLayoutNav() {
 
         <Stack.Screen name="advisor/gic-vs-insurance" options={{ headerShown: false }} />
         <Stack.Screen name="advisor/segregated-funds" options={{ headerShown: false }} />
+        <Stack.Screen name="test" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ 
           presentation: 'modal',
           animation: 'slide_from_bottom',

@@ -9,6 +9,7 @@ import AdvisorCTA from "@/components/AdvisorCTA";
 
 
 export default function MainMenuScreen() {
+  console.log('MainMenuScreen rendering...');
   const router = useRouter();
   const [isLogoLoading, setIsLogoLoading] = useState(true);
   const [hasLogoError, setHasLogoError] = useState(false);
