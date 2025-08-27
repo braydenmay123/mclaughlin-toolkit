@@ -322,9 +322,9 @@ const showAlert = (title: string, message: string, buttons?: any[]) => {
     if (typeof require !== 'undefined') {
       try {
         // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const { Alert } = require('react-native');
-        if (Alert && Alert.alert) {
-          Alert.alert(title, message, buttons || [{ text: 'OK' }]);
+        const { Alert: RNAlert } = require('react-native');
+        if (RNAlert && RNAlert.alert) {
+          RNAlert.alert(title, message, buttons || [{ text: 'OK' }]);
           return;
         }
       } catch {
