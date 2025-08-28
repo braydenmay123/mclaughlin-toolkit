@@ -1,13 +1,12 @@
 {
   "name": "expo-app",
-  "packageManager": "npm@10.8.1",
   "main": "expo-router/entry",
   "version": "1.0.0",
-  "private": true,
   "scripts": {
     "start": "expo start --tunnel",
     "start-web": "expo start --web --tunnel",
-    "start-web-dev": "DEBUG=expo* expo start --web --tunnel"
+    "start-web-dev": "DEBUG=expo* expo start --web --tunnel",
+    "vercel-build": "CI=1 EXPO_DEBUG=1 EXPO_NO_TELEMETRY=1 npx expo export -p web --clear"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
@@ -60,5 +59,6 @@
     "@types/react": "^19.0.10",
     "typescript": "^5.8.3",
     "@expo/webpack-config": "^19.0.0"
-  }
+  },
+  "private": true
 }
