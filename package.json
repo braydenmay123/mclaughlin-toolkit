@@ -2,11 +2,12 @@
   "name": "expo-app",
   "main": "expo-router/entry",
   "version": "1.0.0",
+  "private": true,
   "scripts": {
     "start": "expo start --tunnel",
     "start-web": "expo start --web --tunnel",
     "start-web-dev": "DEBUG=expo* expo start --web --tunnel",
-    "vercel-build": "CI=1 EXPO_DEBUG=1 EXPO_NO_TELEMETRY=1 npx expo export -p web --clear"
+    "vercel-build": "CI=1 EXPO_DEBUG=1 EXPO_NO_TELEMETRY=1 npx expo export -p web --clear && node scripts/strip-import-meta.js"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
@@ -44,7 +45,7 @@
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-native": "0.79.1",
-    "react-native-gesture-handler": "~2.24.0",
+    "react-native-gesture-handler": "2.24.0",
     "react-native-safe-area-context": "5.3.0",
     "react-native-screens": "~4.10.0",
     "react-native-svg": "15.11.2",
@@ -58,6 +59,5 @@
     "@expo/ngrok": "^4.1.0",
     "@types/react": "^19.0.10",
     "typescript": "^5.8.3"
-  },
-  "private": true
+  }
 }
