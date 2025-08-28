@@ -1,9 +1,4 @@
 // scripts/strip-import-meta.js
-// Robust post-export patcher for Expo web export on Vercel:
-// 1) Strip `import.meta` from ALL exported JS files.
-// 2) Ensure ANY Expo entry <script> tag in ANY HTML file is loaded as type="module".
-// 3) Print clear logs so we can verify during Vercel build.
-
 const fs = require("fs");
 const path = require("path");
 
@@ -22,18 +17,18 @@ function walk(dir, out = []) {
 }
 
 if (!fs.existsSync(DIST)) {
-  console.error("[patch] dist/ not found — run the export before this script.");
+  console.error("[patch] dist/ not found — run expo export before this script.");
   process.exit(1);
 }
 
 const files = walk(DIST);
 
-// --- 1) Patch ALL JS files (strip import.meta) ---
+// 1) Patch ALL JS files: strip import.meta (safety)
 let jsPatched = 0;
 for (const file of files) {
   if (!file.endsWith(".js")) continue;
   const src = fs.readFileSync(file, "utf8");
-  if (src.includes("import.meta")) {
+  if (/\bimport\.meta\b/.test(src)) {
     const out = src.replace(/\bimport\.meta\b/g, "{}");
     fs.writeFileSync(file, out, "utf8");
     console.log("[patch] JS   :", path.relative(DIST, file), "— stripped import.meta");
@@ -42,29 +37,73 @@ for (const file of files) {
 }
 console.log(jsPatched ? `[patch] Stripped import.meta in ${jsPatched} JS file(s).` : "[patch] No import.meta found in JS files.");
 
-// --- 2) Patch ALL HTML files (force entry tag to type="module") ---
-const entryTagRegex = /<script([^>]*?)\s+src="(\/_expo\/static\/js\/web\/entry-[^"]+\.js)"([^>]*)><\/script>/ig;
+// Helper: patch a single HTML string to ensure entry is module
+function ensureModuleForEntry(html, relativeHtmlPath) {
+  // Match ANY script whose src contains /_expo/static/js/web/entry-*.js (order of attrs doesn't matter)
+  const genericScriptTag = /<script([^>]*?)src\s*=\s*["'](\/_expo\/static\/js\/web\/entry-[^"']+?\.js)["']([^>]*)><\/script>/ig;
 
-let htmlPatched = 0;
-for (const file of files) {
-  if (!file.endsWith(".html")) continue;
-  let html = fs.readFileSync(file, "utf8");
-
-  const before = html;
-  html = html.replace(entryTagRegex, (m, preAttrs, src, postAttrs) => {
-    const hasType = /\stype\s*=\s*["']module["']/i.test(preAttrs + postAttrs);
-    const newPre = hasType ? preAttrs : `${preAttrs || ""} type="module"`;
-    const tag = `<script${newPre} src="${src}"${postAttrs}></script>`;
-    console.log("[patch] HTML :", path.relative(DIST, file), "— set type=\"module\" on", src);
+  let touched = false;
+  html = html.replace(genericScriptTag, (m, pre, src, post) => {
+    // Already type="module"?
+    if (/\stype\s*=\s*["']module["']/i.test(pre + post)) {
+      return m;
+    }
+    // Try minimal change: add type="module"
+    const newPre = (pre || "") + ' type="module"';
+    const tag = `<script${newPre} src="${src}"${post}></script>`;
+    console.log("[patch] HTML :", relativeHtmlPath, "— set type=\"module\" on", src);
+    touched = true;
     return tag;
   });
 
+  if (!touched) {
+    // Fallback: if we can find the src path at all, replace the WHOLE tag with an inline module import
+    const srcMatch = html.match(/\/_expo\/static\/js\/web\/entry-[^"']+?\.js/);
+    if (srcMatch) {
+      const src = srcMatch[0];
+      const tagMatcher = new RegExp(`<script[^>]*?src=["']${src.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["'][^>]*><\\/script>`, "i");
+      const replacement = `<script type="module">import "${src}";</script>`;
+      if (tagMatcher.test(html)) {
+        html = html.replace(tagMatcher, replacement);
+        console.log("[patch] HTML :", relativeHtmlPath, "— replaced entry tag with inline module import for", src);
+        touched = true;
+      }
+    }
+  }
+  return { html, touched };
+}
+
+// 2) Patch ALL HTML files
+let htmlPatched = 0;
+for (const file of files) {
+  if (!file.endsWith(".html")) continue;
+  const rel = path.relative(DIST, file);
+  let html = fs.readFileSync(file, "utf8");
+  const before = html;
+  const result = ensureModuleForEntry(html, rel);
+  html = result.html;
   if (html !== before) {
     fs.writeFileSync(file, html, "utf8");
     htmlPatched++;
   }
 }
-console.log(htmlPatched ? `[patch] Updated ${htmlPatched} HTML file(s).` : "[patch] No HTML entry tags needed patching.");
+console.log(htmlPatched ? `[patch] Updated ${htmlPatched} HTML file(s).` : "[patch] No HTML files needed patching.");
 
-// --- 3) Done ---
+// 3) FORCE the homepage (and 200.html) just in case
+for (const forceName of ["index.html", "200.html"]) {
+  const file = path.join(DIST, forceName);
+  if (fs.existsSync(file)) {
+    let html = fs.readFileSync(file, "utf8");
+    const before = html;
+    const result = ensureModuleForEntry(html, forceName);
+    html = result.html;
+    if (html !== before) {
+      fs.writeFileSync(file, html, "utf8");
+      console.log("[patch] FORCE:", forceName, "— ensured entry is loaded as module.");
+    } else {
+      console.log("[patch] FORCE:", forceName, "— already OK or no entry tag found.");
+    }
+  }
+}
+
 console.log("[patch] Post-export patch complete.");
