@@ -1,5 +1,11 @@
 {
   "buildCommand": "CI=1 EXPO_DEBUG=1 EXPO_NO_TELEMETRY=1 npx expo export -p web --clear",
   "outputDirectory": "dist",
-  "framework": null
+  "framework": null,
+  "headers": [
+    {
+      "source": "/(index.html|results.html|privacy-policy.html|terms-of-service.html)",
+      "headers": [{ "key": "Cache-Control", "value": "no-store" }]
+    }
+  ]
 }
