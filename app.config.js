@@ -1,4 +1,6 @@
-/** Expo app config in JS to avoid JSON parse errors */
+/** Expo app config in JS (SDK 53)
+ *  Note: Do NOT set web.bundler here; expo export expects Metro in SDK 53.
+ */
 module.exports = {
   expo: {
     name: "McLaughlin Toolkit",
@@ -14,28 +16,28 @@ module.exports = {
     splash: {
       image: "./assets/images/splash-icon.png",
       resizeMode: "contain",
-      backgroundColor: "#ffffff"
+      backgroundColor: "#ffffff",
     },
 
     ios: {
       supportsTablet: true,
-      bundleIdentifier: "app.rork.home-buyers-planning-tool"
+      bundleIdentifier: "app.rork.home-buyers-planning-tool",
     },
 
     android: {
       adaptiveIcon: {
         foregroundImage: "./assets/images/adaptive-icon.png",
-        backgroundColor: "#ffffff"
+        backgroundColor: "#ffffff",
       },
-      package: "app.rork.home-buyers-planning-tool"
+      package: "app.rork.home-buyers-planning-tool",
     },
 
     web: {
-      bundler: "webpack",
+      // Do NOT set bundler here (leave Metro as default for export)
       output: "static",
       favicon: "./assets/images/favicon.png",
       contentSecurityPolicy:
-        "default-src 'self'; script-src 'self' 'unsafe-eval' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src *; font-src 'self' data:; worker-src 'self' blob:"
+        "default-src 'self'; script-src 'self' 'unsafe-eval' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src *; font-src 'self' data:; worker-src 'self' blob:",
     },
 
     plugins: [
@@ -46,7 +48,7 @@ module.exports = {
     ],
 
     experiments: {
-      typedRoutes: true
-    }
-  }
+      typedRoutes: true,
+    },
+  },
 };
