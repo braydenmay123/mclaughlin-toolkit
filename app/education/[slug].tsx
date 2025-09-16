@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
-  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -53,7 +52,7 @@ const chapterData: Record<string, ChapterContent> = {
       {
         title: 'The Power of Diversification',
         content: [
-          'Don\\'t put all your eggs in one basket.',
+          "Don't put all your eggs in one basket.",
           'Diversification means spreading your investments across different:',
           '• Asset classes (stocks, bonds, real estate)',
           '• Geographic regions (Canada, US, International)',
@@ -101,7 +100,7 @@ const chapterData: Record<string, ChapterContent> = {
         },
       },
       {
-        title: 'The Numbers Don\\'t Lie',
+        title: "The Numbers Don't Lie",
         content: [
           'Sarah (started at 25):',
           '• Total contributions: $96,000 (40 years × $200 × 12)',
