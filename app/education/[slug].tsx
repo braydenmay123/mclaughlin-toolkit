@@ -124,6 +124,48 @@ const chapterData: Record<string, ChapterContent> = {
       },
     ],
   },
+  'tfsa-basics': {
+    title: 'Understanding the TFSA',
+    slides: [
+      {
+        title: 'What is a TFSA?',
+        content: [
+          'Tax-Free Savings Account - despite the name, it\'s not just for savings!',
+          'You can hold investments like stocks, bonds, ETFs, and GICs.',
+          'All growth and income inside the TFSA is tax-free.',
+          'Withdrawals are tax-free and don\'t count as income.',
+        ],
+      },
+      {
+        title: 'Contribution Room',
+        content: [
+          'Annual contribution limit set by the government (2024: $7,000).',
+          'Unused room carries forward indefinitely.',
+          'If you were 18+ in 2009, you have accumulated room since then.',
+          'Check your CRA My Account for your exact contribution room.',
+        ],
+      },
+      {
+        title: 'The Withdrawal Advantage',
+        content: [
+          'You can withdraw money anytime without penalty.',
+          'Withdrawn amounts are added back to your contribution room the following year.',
+          'This makes TFSAs flexible for both long-term and short-term goals.',
+          'Perfect for emergency funds or saving for major purchases.',
+        ],
+      },
+      {
+        title: 'Common TFSA Mistakes',
+        content: [
+          '❌ Over-contributing (1% penalty per month on excess)',
+          '❌ Day trading (CRA may consider it business income)',
+          '❌ Using it only for cash (missing growth potential)',
+          '❌ Not maximizing contributions when you have room',
+          '✅ Use it for your highest-growth investments first',
+        ],
+      },
+    ],
+  },
 };
 
 export default function EducationChapter() {
