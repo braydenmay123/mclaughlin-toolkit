@@ -64,7 +64,7 @@ export default function SimpleLineChart({
     <View style={[styles.container, { width, height }]}>
       <Svg width={width} height={height}>
         {/* Grid lines */}
-        {gridLines.map(line => line)}
+        {gridLines}
         
         {/* Main line */}
         <Polyline
