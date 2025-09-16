@@ -169,4 +169,9 @@ app.get("/", (c) => {
   return c.json({ status: "ok", message: "API is running" });
 });
 
+// Test endpoint to verify API is working
+app.get("/test", (c) => {
+  return c.json({ status: "ok", message: "Test endpoint working", timestamp: new Date().toISOString() });
+});
+
 export default app;

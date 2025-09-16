@@ -94,47 +94,65 @@ export default function GateModal({
     });
 
     try {
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone || undefined,
-          interest: formData.interest,
-          notes: formData.notes || undefined,
-          pageSource,
-          honeypot: formData.honeypot,
-        }),
+      console.log('Submitting contact form with data:', {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone || undefined,
+        interest: formData.interest,
+        notes: formData.notes || undefined,
+        pageSource,
+        honeypot: formData.honeypot,
+      });
+      
+      // Try to submit to API, but don't block user if it fails
+      try {
+        const response = await fetch('/api/contact', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone || undefined,
+            interest: formData.interest,
+            notes: formData.notes || undefined,
+            pageSource,
+            honeypot: formData.honeypot,
+          }),
+        });
+        
+        console.log('API Response status:', response.status);
+        
+        if (response.ok) {
+          const result = await response.json();
+          if (result.ok) {
+            console.log('Contact form submitted successfully to API');
+          }
+        }
+      } catch (apiError) {
+        console.warn('API submission failed, but continuing:', apiError);
+        // Log the submission details for manual follow-up
+        console.log('MANUAL FOLLOW-UP NEEDED - Contact form submission:');
+        console.log('Name:', formData.name);
+        console.log('Email:', formData.email);
+        console.log('Phone:', formData.phone || 'Not provided');
+        console.log('Interest:', formData.interest);
+        console.log('Page Source:', pageSource);
+        console.log('Notes:', formData.notes || 'None');
+        console.log('Submitted at:', new Date().toISOString());
+      }
+      
+      // Always save gate status locally and continue
+      await setGateStatus({
+        passed: true,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        interest: formData.interest,
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        throw new Error('Server returned non-JSON response');
-      }
-
-      const result = await response.json();
-
-      if (result.ok) {
-        // Save gate status locally
-        await setGateStatus({
-          passed: true,
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          interest: formData.interest,
-        });
-
-        onSuccess();
-      } else {
-        throw new Error(result.error || 'Submission failed');
-      }
+      onSuccess();
     } catch (error) {
       console.error('Gate submission error:', error);
       Alert.alert(
