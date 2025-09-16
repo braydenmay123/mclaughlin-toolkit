@@ -4,34 +4,16 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Href } from "expo-router";
 import { Home, PiggyBank, TrendingUp, BarChart4, DollarSign, Lock, Percent, ChevronRight, Receipt, ShoppingCart } from "lucide-react-native";
 import Colors from "@/constants/colors";
-import UserInfoModal from "@/components/UserInfoModal";
 
 export default function CalculatorsScreen() {
   console.log('CalculatorsScreen rendering...');
   const router = useRouter();
-  const [showUserInfoModal, setShowUserInfoModal] = useState(true);
   const [isLogoLoading, setIsLogoLoading] = useState(true);
   const [hasLogoError, setHasLogoError] = useState(false);
 
   const navigateToCalculator = (route: Href) => {
     router.push(route);
   };
-
-  const handleUserInfoSubmit = () => {
-    setShowUserInfoModal(false);
-  };
-
-  if (showUserInfoModal) {
-    return (
-      <UserInfoModal
-        visible={showUserInfoModal}
-        onSubmit={handleUserInfoSubmit}
-        onClose={() => router.back()}
-        title="Access Financial Calculators"
-        subtitle="Please provide your contact information to access our comprehensive suite of financial calculators."
-      />
-    );
-  }
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "right", "left"]}>
