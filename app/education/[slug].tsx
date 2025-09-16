@@ -130,10 +130,10 @@ const chapterData: Record<string, ChapterContent> = {
       {
         title: 'What is a TFSA?',
         content: [
-          'Tax-Free Savings Account - despite the name, it\'s not just for savings!',
+          'Tax-Free Savings Account - despite the name, it is not just for savings!',
           'You can hold investments like stocks, bonds, ETFs, and GICs.',
           'All growth and income inside the TFSA is tax-free.',
-          'Withdrawals are tax-free and don\'t count as income.',
+          'Withdrawals are tax-free and do not count as income.',
         ],
       },
       {

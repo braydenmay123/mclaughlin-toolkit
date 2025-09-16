@@ -1,3 +1,5 @@
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+
 interface ContactFormData {
   name: string;
   email: string;
@@ -5,7 +7,7 @@ interface ContactFormData {
   interest: string;
   notes?: string;
   pageSource: string;
-  honeypot?: string; // Hidden field for spam protection
+  honeypot?: string;
 }
 
 // Simple in-memory rate limiting
@@ -13,7 +15,7 @@ const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
 const RATE_LIMIT_MAX_REQUESTS = 5;
 
-function getRateLimitKey(req: any): string {
+function getRateLimitKey(req: VercelRequest): string {
   const forwarded = req.headers['x-forwarded-for'];
   const ip = forwarded ? (Array.isArray(forwarded) ? forwarded[0] : forwarded.split(',')[0]) : req.headers['x-real-ip'] || 'unknown';
   return typeof ip === 'string' ? ip : 'unknown';
@@ -42,10 +44,10 @@ function validateEmail(email: string): boolean {
 }
 
 function sanitizeInput(input: string): string {
-  return input.trim().slice(0, 500); // Limit length and trim
+  return input.trim().slice(0, 500);
 }
 
-export default async function handler(req: any, res: any) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -140,13 +142,12 @@ Submitted at: ${new Date().toISOString()}
       }
     }
 
-    // Fallback: Log to console (in production, you might want to use a different service)
+    // Fallback: Log to console
     console.log('Contact form submission (email service not configured):');
     console.log('Subject:', emailSubject);
     console.log('Body:', emailBody);
 
-    // For now, always return success to avoid blocking users
-    // In production, you might want to integrate with another email service
+    // Always return success to avoid blocking users
     return res.status(200).json({ ok: true });
 
   } catch (error) {

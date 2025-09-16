@@ -20,6 +20,7 @@
     "@trpc/client": "^11.5.0",
     "@trpc/react-query": "^11.5.0",
     "@trpc/server": "^11.5.0",
+    "@vercel/node": "^5.3.22",
     "babel-plugin-transform-import-meta": "^2.3.3",
     "expo": "^53.0.4",
     "expo-blur": "~14.1.4",
