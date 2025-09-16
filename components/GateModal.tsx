@@ -302,10 +302,7 @@ export default function GateModal({
                   {formData.acceptedTerms && <Check size={16} color={Colors.background} />}
                 </View>
                 <Text style={styles.termsText}>
-                  I accept the{' '}
-                  <Text style={styles.termsLink}>Terms of Service</Text>
-                  {' '}and{' '}
-                  <Text style={styles.termsLink}>Privacy Policy</Text>
+                  I accept the <Text style={styles.termsLink}>Terms of Service</Text> and <Text style={styles.termsLink}>Privacy Policy</Text>
                 </Text>
               </TouchableOpacity>
               {errors.acceptedTerms && <Text style={styles.errorText}>{errors.acceptedTerms}</Text>}
