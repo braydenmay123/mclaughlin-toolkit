@@ -24,10 +24,12 @@ const isSmallScreen = screenWidth < 375;
 interface UserInfoModalProps {
   visible: boolean;
   onClose: () => void;
-  onSubmit: (name: string, email: string) => void;
+  onSubmit: (name?: string, email?: string) => void;
   calculatorType?: string;
-  results: any;
+  results?: any;
   isLoading?: boolean;
+  title?: string;
+  subtitle?: string;
 }
 
 export default function UserInfoModal({
@@ -36,6 +38,8 @@ export default function UserInfoModal({
   onSubmit,
   calculatorType,
   results,
+  title,
+  subtitle,
 }: UserInfoModalProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -202,7 +206,7 @@ export default function UserInfoModal({
             >
               <View style={styles.modalView}>
                 <View style={styles.header}>
-                  <Text style={styles.title}>Get Your Results</Text>
+                  <Text style={styles.title}>{title || "Get Your Results"}</Text>
                   <TouchableOpacity 
                     onPress={handleClose} 
                     style={styles.closeButton}
@@ -236,7 +240,7 @@ export default function UserInfoModal({
                 </View>
 
                 <Text style={styles.subtitle}>
-                  Enter your details to view your {getCalculatorDisplayName(calculatorType)} results and receive a PDF copy
+                  {subtitle || `Enter your details to view your ${getCalculatorDisplayName(calculatorType)} results and receive a PDF copy`}
                 </Text>
 
                 <View style={styles.inputGroup}>

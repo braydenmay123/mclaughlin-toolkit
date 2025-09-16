@@ -111,12 +111,17 @@ function RootLayoutNav() {
         }}
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="calculators" options={{ headerShown: false }} />
+        <Stack.Screen name="education" options={{ headerShown: false }} />
+        <Stack.Screen name="asset-mapping" options={{ headerShown: false }} />
         <Stack.Screen name="calculator" options={{ headerShown: false }} />
         <Stack.Screen name="tfsa" options={{ headerShown: false }} />
         <Stack.Screen name="investment" options={{ headerShown: false }} />
         <Stack.Screen name="advisor" options={{ headerShown: false }} />
         <Stack.Screen name="rrsp-tax-savings" options={{ headerShown: false }} />
         <Stack.Screen name="withdrawal-strategy" options={{ headerShown: false }} />
+        <Stack.Screen name="large-purchase" options={{ headerShown: false }} />
+        <Stack.Screen name="tax-calculator" options={{ headerShown: false }} />
 
         <Stack.Screen name="advisor/gic-vs-insurance" options={{ headerShown: false }} />
         <Stack.Screen name="advisor/segregated-funds" options={{ headerShown: false }} />
