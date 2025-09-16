@@ -12,7 +12,7 @@ export default function HomeScreen() {
   const [hasLogoError, setHasLogoError] = useState(false);
 
   const navigateToSection = (route: string) => {
-    router.push(route);
+    router.push(route as any);
   };
 
   return (
