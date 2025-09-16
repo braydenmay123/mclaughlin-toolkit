@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, StyleSheet, Text, TouchableOpacity, ScrollView, Image, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { useRouter, Href } from "expo-router";
 import { Calculator, BookOpen, Map, ChevronRight } from "lucide-react-native";
 import Colors from "@/constants/colors";
 
@@ -11,8 +11,8 @@ export default function HomeScreen() {
   const [isLogoLoading, setIsLogoLoading] = useState(true);
   const [hasLogoError, setHasLogoError] = useState(false);
 
-  const navigateToSection = (route: string) => {
-    router.push(route as any);
+  const navigateToSection = (route: Href) => {
+    router.push(route);
   };
 
   return (
@@ -56,7 +56,7 @@ export default function HomeScreen() {
         <View style={styles.sectionsContainer}>
           <TouchableOpacity 
             style={styles.sectionCard} 
-            onPress={() => navigateToSection("/calculators")}
+            onPress={() => navigateToSection("/go/calculators")}
             activeOpacity={0.7}
           >
             <View style={styles.sectionIconContainer}>
@@ -77,7 +77,7 @@ export default function HomeScreen() {
 
           <TouchableOpacity 
             style={styles.sectionCard} 
-            onPress={() => navigateToSection("/education")}
+            onPress={() => navigateToSection("/go/education")}
             activeOpacity={0.7}
           >
             <View style={styles.sectionIconContainer}>
@@ -97,21 +97,21 @@ export default function HomeScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity 
-            style={[styles.sectionCard, styles.comingSoonCard]} 
-            onPress={() => navigateToSection("/asset-mapping")}
+            style={styles.sectionCard} 
+            onPress={() => navigateToSection("/mapping")}
             activeOpacity={0.7}
           >
-            <View style={[styles.sectionIconContainer, styles.comingSoonIcon]}>
-              <Map size={32} color={Colors.textMuted} />
+            <View style={styles.sectionIconContainer}>
+              <Map size={32} color={Colors.primary} />
             </View>
             <View style={styles.sectionContent}>
               <View style={styles.sectionHeaderRow}>
-                <Text style={[styles.sectionTitle, styles.comingSoonText]}>Interactive Asset Mapping</Text>
-                <View style={styles.comingSoonBadge}>
-                  <Text style={styles.comingSoonBadgeText}>Coming Soon</Text>
+                <Text style={styles.sectionTitle}>Interactive Asset Mapping</Text>
+                <View style={styles.chevronContainer}>
+                  <ChevronRight size={20} color={Colors.primary} />
                 </View>
               </View>
-              <Text style={[styles.sectionDescription, styles.comingSoonText]}>
+              <Text style={styles.sectionDescription}>
                 Visualize and optimize your complete financial portfolio with our interactive asset mapping tool.
               </Text>
             </View>
