@@ -218,7 +218,6 @@ export default function GateModal({
               value={formData.honeypot}
               onChangeText={(value) => setFormData(prev => ({ ...prev, honeypot: value }))}
               autoComplete="off"
-              tabIndex={-1}
             />
 
             <View style={styles.inputGroup}>
@@ -329,7 +328,10 @@ export default function GateModal({
                   {formData.acceptedTerms && <Check size={16} color={Colors.background} />}
                 </View>
                 <Text style={styles.termsText}>
-                  I accept the <Text style={styles.termsLink}>Terms of Service</Text> and <Text style={styles.termsLink}>Privacy Policy</Text>
+                  I accept the{' '}
+                  <Text style={styles.termsLink}>Terms of Service</Text>
+                  {' '}and{' '}
+                  <Text style={styles.termsLink}>Privacy Policy</Text>
                 </Text>
               </TouchableOpacity>
               {errors.acceptedTerms && <Text style={styles.errorText}>{errors.acceptedTerms}</Text>}
@@ -456,7 +458,6 @@ const styles = StyleSheet.create({
   interestGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
   },
   interestOption: {
     paddingHorizontal: 16,
@@ -465,6 +466,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.borderLight,
     backgroundColor: Colors.background,
+    marginRight: 12,
+    marginBottom: 12,
   },
   interestOptionSelected: {
     backgroundColor: Colors.primary,
