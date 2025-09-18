@@ -20,12 +20,20 @@ export interface EducationSlideData {
 interface Props {
   slide: EducationSlideData;
   testID?: string;
+  titleRef?: any;
 }
 
-export default function EducationSlide({ slide, testID }: Props) {
+export default function EducationSlide({ slide, testID, titleRef }: Props) {
   return (
     <View style={styles.container} testID={testID ?? 'education-slide'}>
-      <Text style={styles.title}>{slide.title}</Text>
+      <Text
+        style={styles.title}
+        accessibilityRole="header"
+        // @ts-ignore forward ref for web focus where supported
+        ref={titleRef}
+      >
+        {slide.title}
+      </Text>
 
       {slide.chart ? (
         <View style={styles.chartContainer} testID="education-slide-chart">

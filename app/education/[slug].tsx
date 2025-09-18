@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   ScrollView,
   StyleSheet,
+  Alert,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { ArrowLeft, ArrowRight, ChevronLeft } from 'lucide-react-native';
+import { ArrowLeft, ArrowRight, ChevronLeft, Printer } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import EducationSlide, { EducationSlideData } from '@/components/EducationSlide';
 
@@ -671,8 +673,43 @@ export default function EducationChapter() {
   const router = useRouter();
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const [currentSlide, setCurrentSlide] = useState<number>(0);
+  const slideTitleRef = useRef<any>(null);
 
   const chapter = slug ? chapterData[slug] : null;
+
+  useEffect(() => {
+    setCurrentSlide(0);
+  }, [slug]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const onKey = (e: KeyboardEvent) => {
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          setCurrentSlide((s) => {
+            const next = Math.min((chapter?.slides.length ?? 1) - 1, s + 1);
+            return next;
+          });
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          setCurrentSlide((s) => Math.max(0, s - 1));
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          router.back();
+        }
+      };
+      window.addEventListener('keydown', onKey);
+      return () => window.removeEventListener('keydown', onKey);
+    }
+    return () => {};
+  }, [router, chapter?.slides.length]);
+
+  useEffect(() => {
+    try {
+      // @ts-ignore
+      slideTitleRef.current?.focus?.();
+    } catch {}
+  }, [currentSlide]);
 
   if (!chapter) {
     return (
@@ -685,6 +722,8 @@ export default function EducationChapter() {
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => router.back()}
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
           >
             <Text style={styles.backButtonText}>Go Back</Text>
           </TouchableOpacity>
@@ -696,16 +735,33 @@ export default function EducationChapter() {
   const currentSlideData = chapter.slides[currentSlide];
   const isFirstSlide = currentSlide === 0;
   const isLastSlide = currentSlide === chapter.slides.length - 1;
+  const progressPercent = ((currentSlide + 1) / chapter.slides.length) * 100;
 
   const goToNextSlide = () => {
     if (!isLastSlide) {
-      setCurrentSlide(currentSlide + 1);
+      setCurrentSlide((s) => s + 1);
+    } else {
+      if (Platform.OS === 'web' && typeof window !== 'undefined' && slug) {
+        try { localStorage.setItem(`edu_completed_${slug}`, '1'); } catch {}
+      }
+      router.back();
     }
   };
 
   const goToPreviousSlide = () => {
     if (!isFirstSlide) {
-      setCurrentSlide(currentSlide - 1);
+      setCurrentSlide((s) => s - 1);
+    }
+  };
+
+  const handlePrint = () => {
+    if (Platform.OS === 'web') {
+      try { window.print(); return; } catch {}
+    }
+    if (Platform.OS !== 'web') {
+      Alert.alert('Export', 'Export to PDF coming soon');
+    } else {
+      console.log('Export to PDF coming soon');
     }
   };
 
@@ -716,16 +772,26 @@ export default function EducationChapter() {
           style={styles.headerBackButton}
           onPress={() => router.back()}
           testID="header-back"
+          accessibilityRole="button"
+          accessibilityLabel="Back to Education menu"
         >
           <ChevronLeft size={24} color={Colors.primary} />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
-          <Text style={styles.headerTitle}>{chapter.title}</Text>
+          <Text style={styles.headerTitle} accessibilityRole="header">{chapter.title}</Text>
           <Text style={styles.headerSubtitle}>
             {currentSlide + 1} of {chapter.slides.length}
           </Text>
         </View>
-        <View style={styles.headerPlaceholder} />
+        <TouchableOpacity
+          onPress={handlePrint}
+          style={styles.headerPrint}
+          accessibilityRole="button"
+          accessibilityLabel="Print or export topic"
+          testID="print-topic"
+        >
+          <Printer size={20} color={Colors.textSecondary} />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.progressContainer}>
@@ -733,8 +799,11 @@ export default function EducationChapter() {
           <View
             style={[
               styles.progressFill,
-              { width: `${((currentSlide + 1) / chapter.slides.length) * 100}%` },
+              { width: `${progressPercent}%` },
             ]}
+            accessibilityRole="progressbar"
+            accessibilityValue={{ now: Math.round(progressPercent), min: 0, max: 100 }}
+            testID="progress-fill"
           />
         </View>
         <View style={styles.progressDots}>
@@ -755,13 +824,15 @@ export default function EducationChapter() {
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
-        <EducationSlide slide={currentSlideData} />
+        <EducationSlide slide={currentSlideData} testID="education-slide" titleRef={slideTitleRef} />
       </ScrollView>
 
       <View style={styles.navigation}>
         <TouchableOpacity
           style={[styles.navButton, isFirstSlide && styles.navButtonDisabled]}
           onPress={goToPreviousSlide}
+          accessibilityRole="button"
+          accessibilityLabel="Previous slide"
           disabled={isFirstSlide}
           testID="nav-prev"
         >
@@ -780,21 +851,23 @@ export default function EducationChapter() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.navButton, isLastSlide && styles.navButtonDisabled]}
-          onPress={isLastSlide ? () => router.back() : goToNextSlide}
+          style={[styles.navButton, isLastSlide && styles.navButtonPrimary]}
+          onPress={goToNextSlide}
+          accessibilityRole="button"
+          accessibilityLabel={isLastSlide ? 'Return to menu' : 'Next slide'}
           testID="nav-next"
         >
           <Text
             style={[
               styles.navButtonText,
-              isLastSlide && styles.navButtonTextDisabled,
+              isLastSlide && styles.navButtonTextPrimary,
             ]}
           >
-            {isLastSlide ? 'Complete' : 'Next'}
+            {isLastSlide ? 'Return to Menu' : 'Next'}
           </Text>
           <ArrowRight
             size={20}
-            color={isLastSlide ? Colors.textMuted : Colors.primary}
+            color={isLastSlide ? Colors.background : Colors.primary}
           />
         </TouchableOpacity>
       </View>
@@ -840,8 +913,13 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     marginTop: 2,
   },
-  headerPlaceholder: {
+  headerPrint: {
     width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.backgroundGray,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   progressContainer: {
     paddingHorizontal: 20,
@@ -879,7 +957,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingBottom: 20,
   },
-
   navigation: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -892,12 +969,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingVertical: 14,
+    minHeight: 48,
     borderRadius: 12,
     backgroundColor: Colors.backgroundAlt,
     borderWidth: 1,
     borderColor: Colors.borderLight,
     gap: 8,
+  },
+  navButtonPrimary: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
   },
   navButtonDisabled: {
     opacity: 0.5,
@@ -906,6 +988,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: Colors.primary,
+  },
+  navButtonTextPrimary: {
+    color: Colors.background,
   },
   navButtonTextDisabled: {
     color: Colors.textMuted,
