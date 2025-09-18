@@ -43,12 +43,12 @@ import { downloadPDF, storeUserAnalytics, EmailData } from '@/utils/emailService
 export default function AssetMapReview() {
   const router = useRouter();
   const [assetMapData, setAssetMapData] = useState<AssetMapData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isLogoLoading, setIsLogoLoading] = useState(true);
-  const [hasLogoError, setHasLogoError] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLogoLoading, setIsLogoLoading] = useState<boolean>(true);
+  const [hasLogoError, setHasLogoError] = useState<boolean>(false);
   const [gateData, setGateData] = useState<any>(null);
-  const [isSending, setIsSending] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [isSending, setIsSending] = useState<boolean>(false);
+  const [isGenerating, setIsGenerating] = useState<boolean>(false);
 
   useEffect(() => {
     loadData();
@@ -73,7 +73,7 @@ export default function AssetMapReview() {
   const handleBack = async () => {
     if (!assetMapData) return;
     
-    const updatedData = {
+    const updatedData: AssetMapData = {
       ...assetMapData,
       currentStep: 3,
     };
@@ -85,7 +85,7 @@ export default function AssetMapReview() {
   const handleEditStep = async (step: number) => {
     if (!assetMapData) return;
     
-    const updatedData = {
+    const updatedData: AssetMapData = {
       ...assetMapData,
       currentStep: step,
     };
@@ -101,6 +101,8 @@ export default function AssetMapReview() {
         break;
       case 3:
         router.push('/asset-map/insurance' as any);
+        break;
+      default:
         break;
     }
   };
@@ -253,7 +255,7 @@ export default function AssetMapReview() {
           <Image
             source={{ 
               uri: "https://mclaughlinfinancial.ca/wp-content/uploads/2024/11/logo.png",
-              cache: "force-cache" 
+              cache: "force-cache" as any,
             }}
             style={[styles.logo, hasLogoError && styles.hidden]}
             resizeMode="contain"
@@ -370,11 +372,11 @@ export default function AssetMapReview() {
               <View style={styles.mapCard}>
                 <Text style={styles.mapCardText}>
                   {personalInfo.age ? `Age ${personalInfo.age}` : 'Age not provided'}
-                  {personalInfo.hasSpouse && personalInfo.spouseAge && ` • Spouse ${personalInfo.spouseAge}`}
-                  {personalInfo.dependents > 0 && ` • ${personalInfo.dependents} dependents`}
+                  {personalInfo.hasSpouse && personalInfo.spouseAge ? ` • Spouse ${personalInfo.spouseAge}` : ''}
+                  {personalInfo.dependents > 0 ? ` • ${personalInfo.dependents} dependents` : ''}
                 </Text>
                 <Text style={styles.mapCardSubtext}>
-                  {personalInfo.householdIncome ? formatCurrency(personalInfo.householdIncome) + ' income' : 'Income not provided'}
+                  {personalInfo.householdIncome ? `${formatCurrency(personalInfo.householdIncome)} income` : 'Income not provided'}
                 </Text>
               </View>
             </View>
@@ -414,7 +416,7 @@ export default function AssetMapReview() {
                   {personalInfo.targetRetirementAge ? `Retire at ${personalInfo.targetRetirementAge}` : 'No retirement age set'}
                 </Text>
                 <Text style={styles.mapCardSubtext}>
-                  {personalInfo.targetRetirementIncome ? formatCurrency(personalInfo.targetRetirementIncome) + ' target' : 'No income target'}
+                  {personalInfo.targetRetirementIncome ? `${formatCurrency(personalInfo.targetRetirementIncome)} target` : 'No income target'}
                 </Text>
               </View>
             </View>
