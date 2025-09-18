@@ -82,6 +82,26 @@ export default function GateModal({
     return Object.keys(newErrors).length === 0;
   };
 
+  const postWithRetry = async (url: string, payload: Record<string, any>, attempts = 3): Promise<Response | null> => {
+    let delay = 400;
+    for (let i = 0; i < attempts; i++) {
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        if (res.ok) return res;
+        console.warn('Contact POST non-200 status:', res.status);
+      } catch (e) {
+        console.warn('Contact POST error:', e);
+      }
+      await new Promise((r) => setTimeout(r, delay));
+      delay *= 2;
+    }
+    return null;
+  };
+
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
@@ -104,35 +124,28 @@ export default function GateModal({
         honeypot: formData.honeypot,
       });
       
-      // Try to submit to API, but don't block user if it fails
-      try {
-        const response = await fetch('/api/contact', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone || undefined,
-            interest: formData.interest,
-            notes: formData.notes || undefined,
-            pageSource,
-            honeypot: formData.honeypot,
-          }),
-        });
-        
-        console.log('API Response status:', response.status);
-        
-        if (response.ok) {
-          const result = await response.json();
-          if (result.ok) {
-            console.log('Contact form submitted successfully to API');
-          }
+      const payload = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone || undefined,
+        interest: formData.interest,
+        notes: formData.notes || undefined,
+        pageSource,
+        honeypot: formData.honeypot,
+      };
+
+      const response = await postWithRetry('/api/contact', payload, 3);
+
+      if (response) {
+        try {
+          const result = await response.json().catch(() => ({} as any));
+          console.log('Contact API result:', result);
+          Alert.alert('Success', 'Thanks! We\'ve received your details.');
+        } catch {
+          Alert.alert('Success', 'Thanks! We\'ve received your details.');
         }
-      } catch (apiError) {
-        console.warn('API submission failed, but continuing:', apiError);
-        // Log the submission details for manual follow-up
+      } else {
+        console.warn('API submission failed after retries. Logging for follow-up.');
         console.log('MANUAL FOLLOW-UP NEEDED - Contact form submission:');
         console.log('Name:', formData.name);
         console.log('Email:', formData.email);
@@ -141,9 +154,9 @@ export default function GateModal({
         console.log('Page Source:', pageSource);
         console.log('Notes:', formData.notes || 'None');
         console.log('Submitted at:', new Date().toISOString());
+        Alert.alert('Notice', 'Network issue detected. We saved your info locally and will retry later.');
       }
       
-      // Always save gate status locally and continue
       await setGateStatus({
         passed: true,
         name: formData.name,

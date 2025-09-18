@@ -6,6 +6,12 @@
     {
       "source": "/(index.html|results.html|privacy-policy.html|terms-of-service.html)",
       "headers": [{ "key": "Cache-Control", "value": "no-store" }]
+    },
+    {
+      "source": "/_expo/static/js/web/(entry-.*.js)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=3600, must-revalidate" }
+      ]
     }
   ]
 }
