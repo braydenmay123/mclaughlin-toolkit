@@ -48,7 +48,7 @@ export const storeUserAnalytics = async (data: EmailData): Promise<void> => {
       timestamp: data.timestamp,
       sessionId
     };
-    
+
     await storeAnalytics(analyticsData);
     console.log('User analytics stored:', {
       name: data.name,
@@ -56,6 +56,30 @@ export const storeUserAnalytics = async (data: EmailData): Promise<void> => {
       calculatorType: data.calculatorType,
       sessionId
     });
+
+    try {
+      const pageSource = typeof window !== 'undefined' && window.location ? window.location.pathname : 'app';
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          phone: undefined,
+          interest: data.calculatorType,
+          notes: 'Auto-logged from calculator submission',
+          pageSource,
+          honeypot: ''
+        })
+      });
+      if (!res.ok) {
+        console.warn('Advisor contact forwarding failed with status:', res.status);
+      } else {
+        console.log('Advisor contact forwarding succeeded');
+      }
+    } catch (err) {
+      console.warn('Advisor contact forwarding error:', err);
+    }
   } catch (error) {
     console.error('Failed to store user analytics:', error);
     throw error;

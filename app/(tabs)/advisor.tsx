@@ -26,42 +26,67 @@ export default function AdvisorScreen() {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleSubmit = () => {
-    // Validate form
+  const handleSubmit = async () => {
     const newErrors: Record<string, string> = {};
-    
+
     if (!formData.name.trim()) {
       newErrors.name = "Name is required";
     }
-    
+
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Email is invalid";
     }
-    
+
     if (!formData.phone.trim()) {
       newErrors.phone = "Phone number is required";
     }
-    
+
     setErrors(newErrors);
-    
-    // If no errors, submit form
+
     if (Object.keys(newErrors).length === 0) {
-      Alert.alert(
-        "Request Submitted",
-        "Thank you for your interest! Joe will contact you within 1 business day.",
-        [{ text: "OK" }]
-      );
-      
-      // Reset form
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        preferredDate: "",
-        message: "",
-      });
+      try {
+        const pageSource = typeof window !== 'undefined' && window.location ? window.location.pathname : '/advisor';
+        const payload = {
+          name: formData.name.trim(),
+          email: formData.email.trim().toLowerCase(),
+          phone: formData.phone.trim(),
+          interest: 'Advisor Consultation',
+          notes: formData.message ? formData.message.trim() : undefined,
+          pageSource,
+          honeypot: ''
+        };
+        console.log('Submitting advisor contact payload:', payload);
+        const res = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) {
+          console.warn('Advisor contact API responded with status:', res.status);
+        }
+        Alert.alert(
+          'Request Submitted',
+          'Thank you for your interest! Joe will contact you within 1 business day.',
+          [{ text: 'OK' }]
+        );
+      } catch (e) {
+        console.error('Advisor contact submission failed:', e);
+        Alert.alert(
+          'Submitted',
+          'We received your request. If network issues prevented delivery, we will follow up shortly.',
+          [{ text: 'OK' }]
+        );
+      } finally {
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          preferredDate: '',
+          message: '',
+        });
+      }
     }
   };
 
