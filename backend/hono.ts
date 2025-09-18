@@ -31,6 +31,17 @@ interface ContactFormData {
   honeypot?: string;
 }
 
+// Analytics types and in-memory store (best-effort, fallback to email + client storage)
+interface AnalyticsEntry {
+  calculatorType: string;
+  userInfo: { name: string; email: string };
+  results?: unknown;
+  timestamp: string;
+  sessionId: string;
+}
+
+const analyticsStore: AnalyticsEntry[] = [];
+
 // Simple in-memory rate limiting
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
@@ -71,7 +82,6 @@ function sanitizeInput(input: string): string {
 
 app.post('/contact', async (c) => {
   try {
-    // Rate limiting
     const rateLimitKey = getRateLimitKey(c);
     if (isRateLimited(rateLimitKey)) {
       return c.json({ ok: false, error: 'Too many requests. Please try again later.' }, 429);
@@ -79,17 +89,14 @@ app.post('/contact', async (c) => {
 
     const body: ContactFormData = await c.req.json();
     
-    // Honeypot check (spam protection)
     if (body.honeypot && body.honeypot.trim() !== '') {
       return c.json({ ok: false, error: 'Invalid submission' }, 400);
     }
 
-    // Validate required fields
     if (!body.name || !body.email || !body.interest || !body.pageSource) {
       return c.json({ ok: false, error: 'Missing required fields' }, 400);
     }
 
-    // Sanitize inputs
     const sanitizedData = {
       name: sanitizeInput(body.name),
       email: sanitizeInput(body.email),
@@ -99,12 +106,10 @@ app.post('/contact', async (c) => {
       pageSource: sanitizeInput(body.pageSource)
     };
 
-    // Validate email format
     if (!validateEmail(sanitizedData.email)) {
       return c.json({ ok: false, error: 'Invalid email format' }, 400);
     }
 
-    // Prepare email content
     const emailSubject = `Platform Contact — ${sanitizedData.interest} — ${sanitizedData.name}`;
     const emailBody = `
 New contact form submission from McLaughlin Financial Group Platform:
@@ -119,7 +124,6 @@ Notes: ${sanitizedData.notes || 'None'}
 Submitted at: ${new Date().toISOString()}
     `.trim();
 
-    // Try to send email using Resend if API key is available
     const resendApiKey = process.env.RESEND_API_KEY;
     
     if (resendApiKey) {
@@ -146,22 +150,39 @@ Submitted at: ${new Date().toISOString()}
         return c.json({ ok: true });
       } catch (error) {
         console.error('Resend email failed:', error);
-        // Fall through to fallback method
       }
     }
 
-    // Fallback: Log to console
     console.log('Contact form submission (email service not configured):');
     console.log('Subject:', emailSubject);
     console.log('Body:', emailBody);
 
-    // Always return success to avoid blocking users
     return c.json({ ok: true });
 
   } catch (error) {
     console.error('Contact form error:', error);
     return c.json({ ok: false, error: 'Internal server error' }, 500);
   }
+});
+
+// Analytics endpoints
+app.post('/analytics/track', async (c) => {
+  try {
+    const payload = (await c.req.json()) as AnalyticsEntry;
+    if (!payload?.userInfo?.email || !validateEmail(payload.userInfo.email) || !payload.calculatorType || !payload.timestamp || !payload.sessionId) {
+      return c.json({ ok: false, error: 'Invalid analytics payload' }, 400);
+    }
+    analyticsStore.push(payload);
+    console.log('Analytics tracked:', { email: payload.userInfo.email, type: payload.calculatorType });
+    return c.json({ ok: true });
+  } catch (error) {
+    console.error('Analytics track error:', error);
+    return c.json({ ok: false, error: 'Internal server error' }, 500);
+  }
+});
+
+app.get('/analytics/list', (c) => {
+  return c.json({ ok: true, data: analyticsStore });
 });
 
 // Simple health check endpoint

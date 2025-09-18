@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   Alert,
   ActivityIndicator,
   Image,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -21,7 +22,8 @@ import {
   DollarSign,
   PieChart,
   FileText,
-  Mail
+  Mail,
+  Download
 } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import {
@@ -36,6 +38,7 @@ import {
   getAreasOfConcern,
 } from '@/utils/mappingStorage';
 import { getGateStatus } from '@/utils/gateStorage';
+import { downloadPDF, storeUserAnalytics, EmailData } from '@/utils/emailService';
 
 export default function AssetMapReview() {
   const router = useRouter();
@@ -44,6 +47,8 @@ export default function AssetMapReview() {
   const [isLogoLoading, setIsLogoLoading] = useState(true);
   const [hasLogoError, setHasLogoError] = useState(false);
   const [gateData, setGateData] = useState<any>(null);
+  const [isSending, setIsSending] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -100,7 +105,25 @@ export default function AssetMapReview() {
     }
   };
 
-  const handleSendToAdvisor = () => {
+  const prepareAdvisorPayload = useMemo(() => {
+    if (!assetMapData) return null;
+    const { mappingData, personalInfo, insuranceInfo } = assetMapData;
+    const totals = calculateTotals(mappingData.categories);
+    const savingsRate = calculateSavingsRate(personalInfo, mappingData.categories);
+    const dti = calculateDebtToIncome(personalInfo, mappingData.categories);
+    const protection = getProtectionSnapshot(insuranceInfo, personalInfo);
+
+    return {
+      totals,
+      savingsRate,
+      debtToIncome: dti,
+      protection,
+      personalInfo,
+      categories: mappingData.categories,
+    };
+  }, [assetMapData]);
+
+  const handleSendToAdvisor = async () => {
     if (!gateData?.passed) {
       Alert.alert(
         'Contact Information Required',
@@ -113,11 +136,44 @@ export default function AssetMapReview() {
       return;
     }
 
-    Alert.alert(
-      'Report Sent',
-      'Your asset map report has been prepared for your advisor. They will receive a summary of your financial profile.',
-      [{ text: 'OK' }]
-    );
+    if (!prepareAdvisorPayload) return;
+
+    try {
+      setIsSending(true);
+      const name = gateData?.name ?? 'Unknown';
+      const email = gateData?.email ?? 'unknown@example.com';
+      const payload: EmailData = {
+        name,
+        email,
+        calculatorType: 'Asset Map',
+        results: prepareAdvisorPayload,
+        timestamp: new Date().toISOString(),
+      };
+      await storeUserAnalytics(payload);
+      Alert.alert('Report Sent', 'Your asset map report has been queued for your advisor.');
+    } catch (e) {
+      Alert.alert('Partial Success', 'We saved your report locally. Please try again later if the advisor did not receive it.');
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!prepareAdvisorPayload) return;
+    try {
+      setIsGenerating(true);
+      const name = gateData?.name ?? 'Client';
+      const email = gateData?.email ?? 'client@example.com';
+      await downloadPDF({
+        name,
+        email,
+        calculatorType: 'Asset Map',
+        results: prepareAdvisorPayload,
+        timestamp: new Date().toISOString(),
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   if (isLoading) {
@@ -401,22 +457,33 @@ export default function AssetMapReview() {
         <TouchableOpacity
           style={styles.backNavButton}
           onPress={handleBack}
+          testID="assetMapBack"
         >
           <ArrowLeft size={20} color={Colors.primary} />
           <Text style={styles.backNavButtonText}>Back</Text>
         </TouchableOpacity>
         
-        <View style={styles.stepIndicator}>
-          <Text style={styles.stepText}>Step 4 of 4</Text>
+        <View style={styles.actionsRow}>
+          <TouchableOpacity
+            style={[styles.secondaryButton, isGenerating && styles.disabledBtn]}
+            onPress={handleDownloadPDF}
+            disabled={isGenerating}
+            testID="assetMapDownloadPDF"
+          >
+            <Download size={18} color={Colors.primary} />
+            <Text style={styles.secondaryButtonText}>{isGenerating ? 'Preparing…' : 'Download PDF'}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.sendButton, isSending && styles.disabledBtn]}
+            onPress={handleSendToAdvisor}
+            disabled={isSending}
+            testID="assetMapSendAdvisor"
+          >
+            <Mail size={20} color={Colors.background} />
+            <Text style={styles.sendButtonText}>{isSending ? 'Sending…' : 'Send to Advisor'}</Text>
+          </TouchableOpacity>
         </View>
-        
-        <TouchableOpacity
-          style={styles.sendButton}
-          onPress={handleSendToAdvisor}
-        >
-          <Mail size={20} color={Colors.background} />
-          <Text style={styles.sendButtonText}>Send to Advisor</Text>
-        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -681,6 +748,27 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     fontWeight: '500',
   },
+  actionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  secondaryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.background,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 12,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+  },
+  secondaryButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.primary,
+  },
   sendButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -689,6 +777,9 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 12,
     gap: 8,
+  },
+  disabledBtn: {
+    opacity: 0.6,
   },
   sendButtonText: {
     fontSize: 16,

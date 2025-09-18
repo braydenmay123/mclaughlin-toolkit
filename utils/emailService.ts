@@ -30,6 +30,16 @@ const storeAnalytics = async (data: AnalyticsData): Promise<void> => {
     if (typeof window !== 'undefined' && window.localStorage) {
       localStorage.setItem('calculator_analytics', JSON.stringify(limitedData));
     }
+    
+    try {
+      await fetch('/api/analytics/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+    } catch (e) {
+      console.warn('Server analytics track failed, using client-only storage');
+    }
   } catch (error) {
     console.error('Failed to store analytics:', error);
   }
@@ -181,12 +191,37 @@ export const downloadPDF = async (data: EmailData): Promise<void> => {
 
 export const getAnalyticsSummary = async () => {
   try {
-    const data = await getStoredAnalytics();
+    const clientData = await getStoredAnalytics();
+    let serverData: AnalyticsData[] = [];
+    try {
+      const res = await fetch('/api/analytics/list');
+      if (res.ok) {
+        const json = await res.json();
+        serverData = (json?.data as AnalyticsData[]) || [];
+      }
+    } catch (e) {
+      console.warn('Server analytics fetch failed, using client-only data');
+    }
+
+    const combined = [...serverData, ...clientData];
+
+    const calculatorUsage = combined.reduce<Record<string, number>>((acc, cur) => {
+      acc[cur.calculatorType] = (acc[cur.calculatorType] || 0) + 1;
+      return acc;
+    }, {});
+
+    const topCalculators = Object.entries(calculatorUsage)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+
+    const recentActivity = combined.slice(-50).reverse();
+
     return {
-      totalUsers: data.length,
-      calculatorUsage: {} as Record<string, number>,
-      recentActivity: data.slice(-10).reverse(),
-      topCalculators: [] as { name: string; count: number }[]
+      totalUsers: combined.length,
+      calculatorUsage,
+      recentActivity,
+      topCalculators,
     };
   } catch (error) {
     console.error('Failed to get analytics summary:', error);
