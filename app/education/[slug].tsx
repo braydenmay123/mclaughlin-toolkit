@@ -10,22 +10,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ArrowLeft, ArrowRight, ChevronLeft } from 'lucide-react-native';
 import Colors from '@/constants/colors';
-import SimpleLineChart from '@/components/charts/SimpleLineChart';
+import EducationSlide, { EducationSlideData } from '@/components/EducationSlide';
 
 interface ChapterContent {
   title: string;
-  slides: Slide[];
-}
-
-interface Slide {
-  title: string;
-  content: string[];
-  chart?: {
-    type: 'line';
-    data: number[];
-    labels?: string[];
-    title?: string;
-  };
+  slides: EducationSlideData[];
 }
 
 const chapterData: Record<string, ChapterContent> = {
@@ -33,41 +22,31 @@ const chapterData: Record<string, ChapterContent> = {
     title: 'Investing Basics',
     slides: [
       {
-        title: 'What is Investing?',
+        title: 'Saving vs. Investing',
         content: [
-          'Investing is putting your money to work to generate returns over time.',
-          'Unlike saving, investing involves some level of risk in exchange for the potential of higher returns.',
-          'The goal is to grow your wealth faster than inflation erodes its purchasing power.',
+          'Saving keeps money safe for short-term needs, usually in cash with low risk.',
+          'Investing aims for higher long-term growth by accepting some risk and volatility.',
+          'Use savings for emergencies and near-term goals; invest for goals 3–5+ years away.',
         ],
+        placeholder: 'Graphic: Savings jar vs Investment tree',
       },
       {
-        title: 'Risk vs. Return',
+        title: 'Risk and Return',
         content: [
-          'Higher potential returns typically come with higher risk.',
-          'Lower risk investments (like GICs) offer more predictable but lower returns.',
-          'Higher risk investments (like stocks) can offer greater returns but with more volatility.',
-          'The key is finding the right balance for your situation and timeline.',
+          'Higher potential returns come with higher risk and bigger ups and downs.',
+          'Match risk to your time horizon and comfort level to stay invested through cycles.',
+          'Diversification reduces risk without giving up all the return potential.',
         ],
+        placeholder: 'Graphic: Risk vs return ladder',
       },
       {
-        title: 'The Power of Diversification',
+        title: 'Compounding Over Time',
         content: [
-          "Don't put all your eggs in one basket.",
-          'Diversification means spreading your investments across different:',
-          '• Asset classes (stocks, bonds, real estate)',
-          '• Geographic regions (Canada, US, International)',
-          '• Industries and company sizes',
-          'This helps reduce overall portfolio risk.',
+          'Reinvesting returns allows growth to build on itself year after year.',
+          'Small, consistent contributions can snowball into large balances over decades.',
+          'Time in the market usually beats trying to time the market.',
         ],
-      },
-      {
-        title: 'Time is Your Friend',
-        content: [
-          'The longer your investment timeline, the more risk you can typically take.',
-          'Short-term market volatility becomes less important over longer periods.',
-          'Starting early gives compound growth more time to work its magic.',
-          'Even small amounts invested regularly can grow significantly over time.',
-        ],
+        placeholder: 'Graphic: Curved compounding line vs straight line',
       },
     ],
   },
@@ -77,49 +56,29 @@ const chapterData: Record<string, ChapterContent> = {
       {
         title: 'What is Compound Growth?',
         content: [
-          'Compound growth is earning returns on your returns.',
-          'Your initial investment grows, and then you earn returns on that larger amount.',
-          'Over time, this creates exponential rather than linear growth.',
-          'Albert Einstein allegedly called it "the eighth wonder of the world."',
+          'Compound growth is earning returns on your returns, not just your original contribution.',
+          'It turns steady saving into exponential growth over long periods.',
         ],
+        placeholder: 'Graphic: Snowball rolling downhill',
       },
       {
-        title: 'Starting Early Makes a Huge Difference',
+        title: 'Starting Early Helps',
         content: [
-          'The chart below shows two investors:',
-          '• Sarah starts investing $200/month at age 25',
-          '• Mike starts investing $200/month at age 35',
-          'Both earn 7% annual returns and retire at 65.',
-          'The 10-year head start makes an enormous difference!',
+          'Starting 10 years earlier can result in dramatically higher balances at retirement.',
+          'Consistency matters more than finding the “perfect” time to invest.',
         ],
         chart: {
           type: 'line',
           data: [0, 50000, 120000, 210000, 320000, 450000, 600000, 780000, 980000],
           labels: ['25', '30', '35', '40', '45', '50', '55', '60', '65'],
-          title: 'Sarah vs Mike: The Power of Starting Early',
+          title: 'Starting Early vs Later',
         },
-      },
-      {
-        title: "The Numbers Don't Lie",
-        content: [
-          'Sarah (started at 25):',
-          '• Total contributions: $96,000 (40 years × $200 × 12)',
-          '• Final value: ~$980,000',
-          '',
-          'Mike (started at 35):',
-          '• Total contributions: $72,000 (30 years × $200 × 12)',
-          '• Final value: ~$600,000',
-          '',
-          'Sarah contributed only $24,000 more but ended up with $380,000 more!',
-        ],
       },
       {
         title: 'Key Takeaways',
         content: [
-          'Time is more powerful than the amount you invest.',
-          'Starting early, even with small amounts, beats starting late with larger amounts.',
-          'Consistency matters - regular contributions help smooth out market volatility.',
-          'The best time to start investing was yesterday. The second best time is today.',
+          'Time and consistency are your superpowers.',
+          'Automate contributions and stay invested through market cycles.',
         ],
       },
     ],
@@ -128,41 +87,581 @@ const chapterData: Record<string, ChapterContent> = {
     title: 'Understanding the TFSA',
     slides: [
       {
-        title: 'What is a TFSA?',
+        title: 'TFSA Rules',
         content: [
-          'Tax-Free Savings Account - despite the name, it is not just for savings!',
-          'You can hold investments like stocks, bonds, ETFs, and GICs.',
-          'All growth and income inside the TFSA is tax-free.',
-          'Withdrawals are tax-free and do not count as income.',
+          '18+ Canadians get yearly TFSA room; unused room carries forward.',
+          'Growth and withdrawals are tax-free and do not count as income.',
+          'Withdrawals add back to room the following calendar year.',
         ],
+        placeholder: 'Graphic: TFSA calendar and arrows',
       },
       {
-        title: 'Contribution Room',
+        title: 'What Can You Hold?',
         content: [
-          'Annual contribution limit set by the government (2024: $7,000).',
-          'Unused room carries forward indefinitely.',
-          'If you were 18+ in 2009, you have accumulated room since then.',
-          'Check your CRA My Account for your exact contribution room.',
+          'Eligible investments include ETFs, stocks, bonds, and GICs.',
+          'Use TFSA for higher-growth assets if you can tolerate volatility.',
         ],
+        placeholder: 'Icons: ETF, stock, bond, GIC',
       },
       {
-        title: 'The Withdrawal Advantage',
+        title: 'Tax-Free Withdrawals',
         content: [
-          'You can withdraw money anytime without penalty.',
-          'Withdrawn amounts are added back to your contribution room the following year.',
-          'This makes TFSAs flexible for both long-term and short-term goals.',
-          'Perfect for emergency funds or saving for major purchases.',
+          'Withdraw anytime without tax; ideal for medium-term goals and flexibility.',
+          'Avoid over-contributing—excess amounts incur a monthly penalty.',
         ],
+        placeholder: 'Graphic: Withdrawals added back next year',
+      },
+    ],
+  },
+  'rrsp-basics': {
+    title: 'RRSP Basics',
+    slides: [
+      {
+        title: 'Contributions',
+        content: [
+          'Room equals 18% of prior-year earned income up to a yearly limit.',
+          'Contributions are tax-deductible and can reduce your tax bill.',
+        ],
+        placeholder: 'Graphic: RRSP tax receipt',
       },
       {
-        title: 'Common TFSA Mistakes',
+        title: 'Withdrawals',
         content: [
-          '❌ Over-contributing (1% penalty per month on excess)',
-          '❌ Day trading (CRA may consider it business income)',
-          '❌ Using it only for cash (missing growth potential)',
-          '❌ Not maximizing contributions when you have room',
-          '✅ Use it for your highest-growth investments first',
+          'Withdrawals are taxable as income in the year you take them.',
+          'At retirement, RRSP converts to RRIF; minimum withdrawals apply.',
         ],
+        placeholder: 'Graphic: RRSP to RRIF timeline',
+      },
+      {
+        title: 'Special Uses',
+        content: [
+          'Home Buyers’ Plan lets you withdraw for a first home and repay later.',
+          'Lifelong Learning Plan supports education with repayment rules.',
+        ],
+        placeholder: 'Icons: House, Graduation cap',
+      },
+    ],
+  },
+  'fhsa-guide': {
+    title: 'FHSA — First Home Savings Account',
+    slides: [
+      {
+        title: 'Eligibility & Basics',
+        content: [
+          'For first-time homebuyers meeting residency rules.',
+          'Contributions are tax-deductible; growth and qualifying withdrawals are tax-free.',
+        ],
+        placeholder: 'Graphic: FHSA badge',
+      },
+      {
+        title: 'Pairing with RRSP HBP',
+        content: [
+          'You can combine FHSA withdrawals with RRSP Home Buyers’ Plan.',
+          'This can significantly increase your down payment potential.',
+        ],
+        placeholder: 'Graphic: FHSA + RRSP HBP',
+      },
+    ],
+  },
+  'resp-guide': {
+    title: 'RESP — Saving for Education',
+    slides: [
+      {
+        title: 'Grants',
+        content: [
+          'CESG: 20% match on contributions up to yearly limits; lifetime grant caps apply.',
+          'Additional provincial grants may be available depending on residence.',
+        ],
+        placeholder: 'Graphic: 20% match arrow',
+      },
+      {
+        title: 'Rules & Contributions',
+        content: [
+          'RESPs can be open for many years; contributions are not tax-deductible.',
+          'Investment growth is tax-deferred and taxed in the student’s hands at withdrawal.',
+        ],
+        placeholder: 'Graphic: RESP timeline',
+      },
+      {
+        title: 'Withdrawals',
+        content: [
+          'Education Assistance Payments are taxable to the student, often at low rates.',
+          'Plan for expected costs and coordinate with scholarships and loans.',
+        ],
+        placeholder: 'Icons: Books, tuition receipt',
+      },
+    ],
+  },
+  'rdsp-guide': {
+    title: 'RDSP — Disability Savings',
+    slides: [
+      {
+        title: 'Grants & Bonds',
+        content: [
+          'Government grants and bonds can significantly boost savings, subject to eligibility.',
+          'Designed to support long-term financial security for persons with disabilities.',
+        ],
+        placeholder: 'Graphic: RDSP grant ladder',
+      },
+      {
+        title: 'Withdrawals',
+        content: [
+          'Withdrawals have specific timing and repayment rules tied to government incentives.',
+          'Plan contributions and withdrawals carefully to maximize benefits.',
+        ],
+        placeholder: 'Graphic: RDSP withdrawal rules',
+      },
+    ],
+  },
+  'non-registered': {
+    title: 'Non-Registered Accounts',
+    slides: [
+      {
+        title: 'When to Use',
+        content: [
+          'After maximizing TFSA and RRSP (and FHSA/RESP/RDSP as applicable).',
+          'Useful for flexible investing without contribution limits.',
+        ],
+        placeholder: 'Graphic: Account stack order',
+      },
+      {
+        title: 'Tax Treatment',
+        content: [
+          'You pay tax annually on interest, dividends, and realized capital gains.',
+          'Keep good records for adjusted cost base and transactions.',
+        ],
+        placeholder: 'Icons: T-slips and calculator',
+      },
+    ],
+  },
+  'mutual-funds': {
+    title: 'Mutual Funds',
+    slides: [
+      {
+        title: 'What They Are',
+        content: [
+          'Professionally managed pools of investments you buy as units.',
+          'Provide diversification and simplicity for many investors.',
+        ],
+        placeholder: 'Graphic: Pool of investors',
+      },
+      {
+        title: 'Pros & Cons',
+        content: [
+          'Pros: Easy to buy, diversified, automatic rebalancing.',
+          'Cons: MER fees can be higher; performance varies by manager.',
+        ],
+        placeholder: 'Graphic: Scale with pros and cons',
+      },
+    ],
+  },
+  'etf-basics': {
+    title: 'ETFs',
+    slides: [
+      {
+        title: 'What They Are',
+        content: [
+          'Exchange-traded funds typically track an index and trade like a stock.',
+          'Often very low MERs with broad diversification.',
+        ],
+        placeholder: 'Graphic: Index puzzle pieces',
+      },
+      {
+        title: 'Pros & Cons',
+        content: [
+          'Pros: Low cost, liquid, tax-efficient for many strategies.',
+          'Cons: Bid/ask spreads; some complexity when building portfolios.',
+        ],
+        placeholder: 'Graphic: Pros/cons checklist',
+      },
+    ],
+  },
+  'gic-basics': {
+    title: 'GICs',
+    slides: [
+      {
+        title: 'How They Work',
+        content: [
+          'Guaranteed Investment Certificates pay a fixed rate for a set term.',
+          'Principal is protected; ideal for short-term or safety-first goals.',
+        ],
+        placeholder: 'Graphic: Shield over cash',
+      },
+      {
+        title: 'When They Fit',
+        content: [
+          'Use for emergency funds and near-term purchases where stability matters.',
+          'Rates vary by term and issuer; consider CDIC coverage limits.',
+        ],
+        placeholder: 'Graphic: Calendar with maturity',
+      },
+    ],
+  },
+  'stocks-basics': {
+    title: 'Stocks',
+    slides: [
+      {
+        title: 'Ownership and Growth',
+        content: [
+          'Buying a stock means owning a piece of a company and its future profits.',
+          'Historically offer higher long-term returns with higher volatility.',
+        ],
+        placeholder: 'Graphic: Stock certificate',
+      },
+      {
+        title: 'Volatility & Diversification',
+        content: [
+          'Individual stocks can swing widely; diversify to reduce company-specific risk.',
+          'Use ETFs or mutual funds to spread risk if stock picking isn’t your focus.',
+        ],
+        placeholder: 'Graphic: Diversified pie chart',
+      },
+      {
+        title: 'Long-Term Mindset',
+        content: [
+          'Focus on decades, not days. Short-term drops are normal and expected.',
+          'Align stock allocation with your time horizon and risk tolerance.',
+        ],
+        placeholder: 'Graphic: Mountain chart over decades',
+      },
+    ],
+  },
+  'bonds-explained': {
+    title: 'Bonds',
+    slides: [
+      {
+        title: 'What is a Bond?',
+        content: [
+          'A bond is a loan to a government or company that pays interest and returns principal at maturity.',
+          'Bonds help stabilize portfolios and provide income.',
+        ],
+        placeholder: 'Graphic: Coupon payments',
+      },
+      {
+        title: 'Interest Rates & Risk',
+        content: [
+          'When rates rise, existing bond prices often fall; duration measures sensitivity.',
+          'Mix shorter and longer terms to balance risk and return.',
+        ],
+        placeholder: 'Graphic: See-saw of rates vs prices',
+      },
+    ],
+  },
+  'emergency-funds': {
+    title: 'Emergency Funds',
+    slides: [
+      {
+        title: 'How Much?',
+        content: [
+          'Target 3–6 months of essential expenses; more if income is variable.',
+          'Start with a small target and build steadily.',
+        ],
+        placeholder: 'Graphic: 3–6 months gauge',
+      },
+      {
+        title: 'Where to Keep It',
+        content: [
+          'Use a high-interest savings account or short-term GIC for safety and access.',
+          'Keep it separate from daily spending to avoid temptation.',
+        ],
+        placeholder: 'Graphic: Savings bucket',
+      },
+    ],
+  },
+  budgeting: {
+    title: 'Budgeting & Cash Flow',
+    slides: [
+      {
+        title: 'Simple Frameworks',
+        content: [
+          '50/30/20 rule: 50% needs, 30% wants, 20% saving/debt repayment.',
+          'Customize percentages to your situation; the point is clarity and consistency.',
+        ],
+        placeholder: 'Graphic: 50/30/20 pie',
+      },
+      {
+        title: 'Track and Tweak',
+        content: [
+          'List income and expenses; look for quick wins you can automate.',
+          'Review monthly and adjust to stay on course.',
+        ],
+        placeholder: 'Graphic: Monthly checklist',
+      },
+      {
+        title: 'Build Buffers',
+        content: [
+          'Set aside sinking funds for irregular expenses like car repairs and gifts.',
+          'This reduces reliance on credit cards and stress.',
+        ],
+        placeholder: 'Graphic: Sinking fund jars',
+      },
+    ],
+  },
+  'financial-goals': {
+    title: 'Setting Financial Goals',
+    slides: [
+      {
+        title: 'Define and Prioritize',
+        content: [
+          'Write down short-, medium-, and long-term goals with dollar amounts and dates.',
+          'Prioritize by urgency and impact to focus your savings.',
+        ],
+        placeholder: 'Graphic: Goal ladder',
+      },
+      {
+        title: 'Align Accounts & Investments',
+        content: [
+          'Match each goal to the right account (TFSA, RRSP, non-registered) and risk level.',
+          'Automate transfers to make steady progress.',
+        ],
+        placeholder: 'Graphic: Goal-to-account map',
+      },
+    ],
+  },
+  'debt-vs-investing': {
+    title: 'Debt vs. Investing',
+    slides: [
+      {
+        title: 'Rules of Thumb',
+        content: [
+          'High-interest debt (e.g., credit cards) usually beats investment returns—pay it first.',
+          'Consider splitting extra cash: some to debt, some to investing, to build momentum.',
+        ],
+        placeholder: 'Graphic: Debt payoff vs invest scale',
+      },
+      {
+        title: 'Compare Rates and Risk',
+        content: [
+          'If your after-tax expected return is lower than your interest rate, prioritize debt.',
+          'Emergency fund and employer matches can justify investing sooner.',
+        ],
+        placeholder: 'Graphic: Interest vs return chart',
+      },
+    ],
+  },
+  'life-insurance-types': {
+    title: 'Life Insurance Types',
+    slides: [
+      {
+        title: 'Term Insurance',
+        content: [
+          'Covers you for a set period (e.g., 10, 20, 30 years) with affordable premiums.',
+          'Great for income replacement while raising a family or paying a mortgage.',
+        ],
+        placeholder: 'Graphic: Term timeline',
+      },
+      {
+        title: 'Whole Life',
+        content: [
+          'Permanent coverage with a cash value component and level premiums.',
+          'Useful for estate planning and lifelong needs; typically higher cost.',
+        ],
+        placeholder: 'Graphic: Shield + cash value',
+      },
+      {
+        title: 'Universal Life',
+        content: [
+          'Flexible premiums and investment options inside the policy.',
+          'Suited for advanced planning with advisor guidance.',
+        ],
+        placeholder: 'Graphic: Flexible sliders',
+      },
+    ],
+  },
+  'why-insurance': {
+    title: 'Why Insurance',
+    slides: [
+      {
+        title: 'Protect What Matters',
+        content: [
+          'Insurance replaces income, pays debts, and protects family goals if the unexpected happens.',
+          'It turns big, unpredictable risks into manageable monthly costs.',
+        ],
+        placeholder: 'Graphic: Family umbrella',
+      },
+      {
+        title: 'Timing',
+        content: [
+          'Get coverage when others rely on your income or you have significant debts.',
+          'Coverage costs are generally lower when you are younger and healthier.',
+        ],
+        placeholder: 'Graphic: Life stages',
+      },
+    ],
+  },
+  'ci-di': {
+    title: 'Critical Illness & Disability',
+    slides: [
+      {
+        title: 'What They Cover',
+        content: [
+          'Critical Illness pays a lump sum after diagnosis of covered conditions.',
+          'Disability Insurance replaces a portion of income if you cannot work.',
+        ],
+        placeholder: 'Graphic: CI lump sum, DI income stream',
+      },
+      {
+        title: 'Why It Matters',
+        content: [
+          'A health event can derail savings; coverage keeps your plan on track.',
+          'Coordinate with workplace benefits and fill gaps as needed.',
+        ],
+        placeholder: 'Graphic: Bridge over gap',
+      },
+    ],
+  },
+  'insurance-coverage': {
+    title: 'How Much Insurance Do You Need?',
+    slides: [
+      {
+        title: 'Coverage Frameworks',
+        content: [
+          'Add up debts, final expenses, income replacement years, and education costs.',
+          'Subtract existing assets and benefits to estimate the gap to insure.',
+        ],
+        placeholder: 'Graphic: Coverage formula',
+      },
+      {
+        title: 'Right-Sizing',
+        content: [
+          'Start with affordable term and revisit as life changes (marriage, kids, mortgage).',
+          'Mix term and permanent if you have lifelong needs and estate goals.',
+        ],
+        placeholder: 'Graphic: Policy mix bars',
+      },
+    ],
+  },
+  'investment-taxation': {
+    title: 'Capital Gains, Dividends, Interest',
+    slides: [
+      {
+        title: 'Capital Gains',
+        content: [
+          'Only 50% of capital gains are taxable in Canada when realized.',
+          'Tax timing is within your control—consider holding for the long term.',
+        ],
+        placeholder: 'Graphic: Purchase vs sale timeline',
+      },
+      {
+        title: 'Dividends',
+        content: [
+          'Eligible Canadian dividends receive a tax credit that can lower taxes.',
+          'Foreign dividends are typically fully taxable and may face withholding tax.',
+        ],
+        placeholder: 'Graphic: Dividend tax credit badge',
+      },
+      {
+        title: 'Interest',
+        content: [
+          'Interest income is fully taxable at your marginal rate in non-registered accounts.',
+          'Consider holding interest-bearing assets in registered accounts when possible.',
+        ],
+        placeholder: 'Graphic: Interest slip T5',
+      },
+    ],
+  },
+  'retirement-basics': {
+    title: 'Retirement Basics',
+    slides: [
+      {
+        title: 'How Much Do You Need?',
+        content: [
+          'Estimate annual spending, subtract government and employer pensions, and fill the gap with savings.',
+          'A common rule: plan for 70–80% of pre-retirement income, adjusted to your lifestyle.',
+        ],
+        placeholder: 'Graphic: Retirement budget worksheet',
+      },
+      {
+        title: 'Withdrawal Order',
+        content: [
+          'Coordinate RRSP/RRIF, TFSA, and non-registered withdrawals for tax efficiency.',
+          'Delay CPP/OAS can increase lifetime benefits; run scenarios with an advisor.',
+        ],
+        placeholder: 'Graphic: Account withdrawal order',
+      },
+    ],
+  },
+  'cpp-oas': {
+    title: 'CPP & OAS',
+    slides: [
+      {
+        title: 'What They Are',
+        content: [
+          'CPP is an earnings-based pension; OAS is a residency-based benefit.',
+          'Both can be taken earlier or later, with adjustments to amounts.',
+        ],
+        placeholder: 'Graphic: CPP and OAS logos',
+      },
+      {
+        title: 'Timing & Clawbacks',
+        content: [
+          'Delaying to age 70 increases payments but must fit your plan and health.',
+          'OAS may be clawed back above certain income thresholds; plan withdrawals accordingly.',
+        ],
+        placeholder: 'Graphic: OAS clawback meter',
+      },
+    ],
+  },
+  'staying-invested': {
+    title: 'Staying Invested',
+    slides: [
+      {
+        title: 'Discipline Wins',
+        content: [
+          'Missing just a few best days can seriously reduce long-term returns.',
+          'Create a plan you can stick with during market swings.',
+        ],
+        placeholder: 'Graphic: Best days bar chart placeholder',
+      },
+      {
+        title: 'Focus on Process',
+        content: [
+          'Automate contributions and rebalancing to remove emotion.',
+          'Review annually, not daily; zoom out to the long-term trend.',
+        ],
+        placeholder: 'Graphic: Calendar with auto transfer',
+      },
+    ],
+  },
+  'risk-vs-reward': {
+    title: 'Risk vs Reward',
+    slides: [
+      {
+        title: 'Know Your Comfort Zone',
+        content: [
+          'Use risk questionnaires and historical scenarios to find a suitable mix.',
+          'The right portfolio is one you can hold through tough markets.',
+        ],
+        placeholder: 'Graphic: Risk meter',
+      },
+      {
+        title: 'Match Risk to Timeline',
+        content: [
+          'More stocks for long-term goals, more bonds/cash for short-term goals.',
+          'Diversification across regions and sectors reduces single-risk exposure.',
+        ],
+        placeholder: 'Graphic: Glide path visual',
+      },
+    ],
+  },
+  'investing-mistakes': {
+    title: 'Common Investing Mistakes',
+    slides: [
+      {
+        title: 'Behavioral Pitfalls',
+        content: [
+          'Chasing past winners, panic selling, and trying to time the market hurt results.',
+          'Set rules ahead of time to avoid emotional decisions.',
+        ],
+        placeholder: 'Graphic: Fear and greed pendulum',
+      },
+      {
+        title: 'Cost and Complexity',
+        content: [
+          'High fees compound against you; prefer simple, low-cost, diversified approaches.',
+          'Too many overlapping funds can dilute performance and add confusion.',
+        ],
+        placeholder: 'Graphic: Fee drag illustration',
       },
     ],
   },
@@ -171,7 +670,7 @@ const chapterData: Record<string, ChapterContent> = {
 export default function EducationChapter() {
   const router = useRouter();
   const { slug } = useLocalSearchParams<{ slug: string }>();
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const [currentSlide, setCurrentSlide] = useState<number>(0);
 
   const chapter = slug ? chapterData[slug] : null;
 
@@ -216,6 +715,7 @@ export default function EducationChapter() {
         <TouchableOpacity
           style={styles.headerBackButton}
           onPress={() => router.back()}
+          testID="header-back"
         >
           <ChevronLeft size={24} color={Colors.primary} />
         </TouchableOpacity>
@@ -255,27 +755,7 @@ export default function EducationChapter() {
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.slideTitle}>{currentSlideData.title}</Text>
-
-        {currentSlideData.chart && (
-          <View style={styles.chartContainer}>
-            <Text style={styles.chartTitle}>
-              {currentSlideData.chart.title || 'Chart'}
-            </Text>
-            <SimpleLineChart
-              data={currentSlideData.chart.data}
-              labels={currentSlideData.chart.labels}
-            />
-          </View>
-        )}
-
-        <View style={styles.slideContent}>
-          {currentSlideData.content.map((paragraph, index) => (
-            <Text key={index} style={styles.slideText}>
-              {paragraph}
-            </Text>
-          ))}
-        </View>
+        <EducationSlide slide={currentSlideData} />
       </ScrollView>
 
       <View style={styles.navigation}>
@@ -283,6 +763,7 @@ export default function EducationChapter() {
           style={[styles.navButton, isFirstSlide && styles.navButtonDisabled]}
           onPress={goToPreviousSlide}
           disabled={isFirstSlide}
+          testID="nav-prev"
         >
           <ArrowLeft
             size={20}
@@ -301,6 +782,7 @@ export default function EducationChapter() {
         <TouchableOpacity
           style={[styles.navButton, isLastSlide && styles.navButtonDisabled]}
           onPress={isLastSlide ? () => router.back() : goToNextSlide}
+          testID="nav-next"
         >
           <Text
             style={[
@@ -397,38 +879,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingBottom: 20,
   },
-  slideTitle: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: Colors.primary,
-    marginBottom: 24,
-    letterSpacing: -0.5,
-    lineHeight: 34,
-  },
-  chartContainer: {
-    marginBottom: 32,
-    padding: 20,
-    backgroundColor: Colors.backgroundAlt,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
-  },
-  chartTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.primary,
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  slideContent: {
-    gap: 16,
-  },
-  slideText: {
-    fontSize: 17,
-    lineHeight: 26,
-    color: Colors.text,
-    fontWeight: '400',
-  },
+
   navigation: {
     flexDirection: 'row',
     justifyContent: 'space-between',
