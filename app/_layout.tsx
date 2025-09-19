@@ -112,7 +112,6 @@ function RootLayoutNav() {
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="calculators" options={{ headerShown: false }} />
-        <Stack.Screen name="education" options={{ headerShown: false }} />
         <Stack.Screen name="mapping" options={{ headerShown: false }} />
         <Stack.Screen name="go/calculators" options={{ headerShown: false }} />
         <Stack.Screen name="go/education" options={{ headerShown: false }} />

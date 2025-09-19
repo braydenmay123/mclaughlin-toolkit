@@ -38,7 +38,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="education"
+        name="edu-tab"
         options={{
           title: "Home Buying Guide",
           tabBarLabel: "Education",

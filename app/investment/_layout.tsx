@@ -29,12 +29,6 @@ export default function InvestmentLayout() {
         }}
       />
       <Stack.Screen
-        name="education"
-        options={{
-          title: "Investment Guide",
-        }}
-      />
-      <Stack.Screen
         name="advisor"
         options={{
           title: "Talk with Joe",

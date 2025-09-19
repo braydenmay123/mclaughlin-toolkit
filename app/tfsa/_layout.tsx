@@ -29,12 +29,6 @@ export default function TFSALayout() {
         }}
       />
       <Stack.Screen
-        name="education"
-        options={{
-          title: "TFSA Guide",
-        }}
-      />
-      <Stack.Screen
         name="advisor"
         options={{
           title: "Talk with Joe",
