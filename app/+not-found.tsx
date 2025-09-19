@@ -1,18 +1,20 @@
-import { Link, Stack } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import { Stack, Link } from "expo-router";
+import { View, Text, Pressable, StyleSheet } from "react-native";
 
 export default function NotFoundScreen() {
   return (
-    <>
-      <Stack.Screen options={{ title: "Oops!" }} />
-      <View style={styles.container}>
-        <Text style={styles.title}>This screen doesn't exist.</Text>
-
-        <Link href="/" style={styles.link}>
-          <Text style={styles.linkText}>Go to home screen!</Text>
-        </Link>
-      </View>
-    </>
+    <View style={styles.container}>
+      <Stack.Screen options={{ title: "Page Not Found" }} />
+      <Text style={styles.title}>Oops — that page doesn’t exist.</Text>
+      <Text style={styles.subtitle}>
+        The link may be broken or the page may have moved.
+      </Text>
+      <Link href="/" asChild>
+        <Pressable style={styles.button} testID="go-home-button">
+          <Text style={styles.buttonText}>Go to Home</Text>
+        </Pressable>
+      </Link>
+    </View>
   );
 }
 
@@ -21,18 +23,27 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    padding: 20,
+    padding: 24,
+    gap: 12,
   },
   title: {
-    fontSize: 20,
-    fontWeight: "bold",
+    fontSize: 22,
+    fontWeight: "600",
+    textAlign: "center",
   },
-  link: {
-    marginTop: 15,
-    paddingVertical: 15,
-  },
-  linkText: {
+  subtitle: {
     fontSize: 14,
-    color: "#2e78b7",
+    opacity: 0.8,
+    textAlign: "center",
+    maxWidth: 420,
+  },
+  button: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  buttonText: {
+    fontSize: 16,
   },
 });

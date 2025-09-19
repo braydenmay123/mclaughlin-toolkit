@@ -1,9 +1,23 @@
 Build Failed Command "CI=1 EXPO_DEBUG=1 EXPO_NO_TELEMETRY=1 npx expo export -p web --clear && node scripts/strip-import-meta.js && node scripts/fix-expo-html.js" exited with 1.
-    at renderAsync (/vercel/path0/node_modules/@expo/cli/src/start/server/metro/MetroBundlerDevServer.ts:319:22)
-    at renderAsync (/vercel/path0/node_modules/@expo/cli/src/export/exportStaticAsync.ts:180:30)
-    at map (/vercel/path0/node_modules/@expo/cli/src/export/exportStaticAsync.ts:86:30)
-    at Array.map (<anonymous>)
-    at getFilesToExportFromServerAsync (/vercel/path0/node_modules/@expo/cli/src/export/exportStaticAsync.ts:81:71)
-    at exportFromServerAsync (/vercel/path0/node_modules/@expo/cli/src/export/exportStaticAsync.ts:175:9)
-    at processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at exportAppAsync (/vercel/path0/node_modules/@expo/cli/src/export/exportApp.ts:376:9)
+15:15:45.119 at retryNode (/vercel/path0/node_modules/react-dom/cjs/react-dom-server-legacy.node.production.js:4466:16)
+15:15:45.119 at renderNodeDestructive (/vercel/path0/node_modules/react-dom/cjs/react-dom-server-legacy.node.production.js:4284:7)
+15:15:45.119 at renderElement (/vercel/path0/node_modules/react-dom/cjs/react-dom-server-legacy.node.production.js:4218:11)
+15:15:45.119 at retryNode (/vercel/path0/node_modules/react-dom/cjs/react-dom-server-legacy.node.production.js:4466:16)
+15:15:45.119 at renderNodeDestructive (/vercel/path0/node_modules/react-dom/cjs/react-dom-server-legacy.node.production.js:4284:7)
+15:15:45.119 at renderElement (/vercel/path0/node_modules/react-dom/cjs/react-dom-server-legacy.node.production.js:3913:7)
+15:15:45.119 at retryNode (/vercel/path0/node_modules/react-dom/cjs/react-dom-server-legacy.node.production.js:4466:16)
+15:15:45.152 at performWork (/vercel/path0/node_module
+15:15:45.152 2025-09-19T19:15:44.961Z expo:start:platforms:android:adbServer Stopping ADB server
+15:15:45.152 2025-09-19T19:15:44.962Z expo:start:platforms:android:adbServer ADB server is not running
+15:15:45.152 2025-09-19T19:15:44.962Z expo:start:server:devServer Stopping dev server (bundler: metro)
+15:15:45.152 2025-09-19T19:15:44.964Z expo:start:server:devServer Stopped dev server (bundler: metro)
+15:15:45.152 Error: Failed to statically export route: +not-found
+15:15:45.152 Error: Failed to statically export route: +not-found
+15:15:45.152 at /vercel/path0/node_modules/@expo/cli/src/export/exportStaticAsync.ts:94:17
+15:15:45.152 at processTicksAndRejections (node:internal/process/task_queues:95:5)
+15:15:45.152 at async Promise.all (index 0)
+15:15:45.152 at getFilesToExportFromServerAsync (/vercel/path0/node_modules/@expo/cli/src/export/exportStaticAsync.ts:80:3)
+15:15:45.152 at exportFromServerAsync (/vercel/path0/node_modules/@expo/cli/src/export/exportStaticAsync.ts:175:3)
+15:15:45.152 at exportAppAsync (/vercel/path0/node_modules/@expo/cli/src/export/exportApp.ts:376:9)
+15:15:45.152 at exportAsync (/vercel/path0/node_modules/@expo/cli/src/export/exportAsync.ts:31:3)
+15:15:45.224 Error: Command "CI=1 EXPO_DEBUG=1 EXPO_NO_TELEMETRY=1 npx expo export -p web --clear && node scripts/strip-import-meta.js && node scripts/fix-expo-html.js" exited with 1
