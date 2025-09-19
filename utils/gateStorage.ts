@@ -14,11 +14,11 @@ export interface GateData {
 }
 
 const getStorage = () => {
-  if (Platform.OS === 'web') {
+  if (Platform.OS === 'web' && typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
     return {
-      getItem: (key: string) => Promise.resolve(localStorage.getItem(key)),
-      setItem: (key: string, value: string) => Promise.resolve(localStorage.setItem(key, value)),
-      removeItem: (key: string) => Promise.resolve(localStorage.removeItem(key))
+      getItem: (key: string) => Promise.resolve(window.localStorage.getItem(key)),
+      setItem: (key: string, value: string) => Promise.resolve(window.localStorage.setItem(key, value)),
+      removeItem: (key: string) => Promise.resolve(window.localStorage.removeItem(key)),
     };
   }
   return AsyncStorage;

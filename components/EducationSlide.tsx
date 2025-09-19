@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Colors from '@/constants/colors';
-import SimpleLineChart from '@/components/charts/SimpleLineChart';
+
+const SimpleLineChart = React.lazy(() => import('@/components/charts/SimpleLineChart'));
 
 export interface EducationSlideChart {
   type: 'line';
@@ -24,6 +25,12 @@ interface Props {
 }
 
 export default function EducationSlide({ slide, testID, titleRef }: Props) {
+  const [mounted, setMounted] = useState<boolean>(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
     <View style={styles.container} testID={testID ?? 'education-slide'}>
       <Text
@@ -36,10 +43,18 @@ export default function EducationSlide({ slide, testID, titleRef }: Props) {
       </Text>
 
       {slide.chart ? (
-        <View style={styles.chartContainer} testID="education-slide-chart">
-          <Text style={styles.chartTitle}>{slide.chart.title ?? 'Chart'}</Text>
-          <SimpleLineChart data={slide.chart.data} labels={slide.chart.labels} />
-        </View>
+        mounted ? (
+          <View style={styles.chartContainer} testID="education-slide-chart">
+            <Text style={styles.chartTitle}>{slide.chart.title ?? 'Chart'}</Text>
+            <Suspense fallback={<Text style={styles.placeholderText}>Loading chart…</Text>}>
+              <SimpleLineChart data={slide.chart.data} labels={slide.chart.labels} />
+            </Suspense>
+          </View>
+        ) : (
+          <View style={styles.placeholder} testID="education-slide-placeholder">
+            <Text style={styles.placeholderText}>{slide.placeholder ?? 'Chart will load shortly'}</Text>
+          </View>
+        )
       ) : slide.placeholder ? (
         <View style={styles.placeholder} testID="education-slide-placeholder">
           <Text style={styles.placeholderText}>{slide.placeholder}</Text>
