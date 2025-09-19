@@ -1,5 +1,5 @@
 {
-  "buildCommand": "CI=1 EXPO_DEBUG=1 EXPO_NO_TELEMETRY=1 npx expo export -p web --clear && node scripts/strip-import-meta.js && node scripts/fix-expo-html.js",
+  "buildCommand": "node scripts/no-not-found-route.js && node scripts/preexport-clean.js && CI=1 EXPO_DEBUG=1 EXPO_NO_TELEMETRY=1 npx expo export -p web --clear && node scripts/strip-import-meta.js && node scripts/fix-expo-html.js",
   "outputDirectory": "dist",
   "framework": null,
   "headers": [
