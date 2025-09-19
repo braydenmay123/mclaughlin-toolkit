@@ -1,16 +1,24 @@
-import { Stack, Link } from "expo-router";
-import { View, Text, Pressable, StyleSheet } from "react-native";
+// app/+not-found.tsx
+import * as React from "react";
+import { View, Text, StyleSheet, Pressable } from "react-native";
+import { Link, Stack } from "expo-router";
 
 export default function NotFoundScreen() {
   return (
-    <View style={styles.container}>
-      <Stack.Screen options={{ title: "Page Not Found" }} />
-      <Text style={styles.title}>Oops — that page doesn’t exist.</Text>
-      <Text style={styles.subtitle}>
-        The link may be broken or the page may have moved.
+    <View style={styles.container} testID="not-found-screen">
+      {/* Set page metadata safely during SSR */}
+      <Stack.Screen options={{ title: "Page not found" }} />
+
+      <Text accessibilityRole="header" style={styles.title}>
+        404 — Page not found
       </Text>
+
+      <Text style={styles.subtitle}>
+        The page you’re looking for doesn’t exist or has moved.
+      </Text>
+
       <Link href="/" asChild>
-        <Pressable style={styles.button} testID="go-home-button">
+        <Pressable accessibilityRole="button" testID="go-home-button" style={styles.button}>
           <Text style={styles.buttonText}>Go to Home</Text>
         </Pressable>
       </Link>
@@ -20,30 +28,14 @@ export default function NotFoundScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 24,
-    gap: 12,
+    flex: 1, alignItems: "center", justifyContent: "center", padding: 24,
+    backgroundColor: "white",
   },
-  title: {
-    fontSize: 22,
-    fontWeight: "600",
-    textAlign: "center",
-  },
-  subtitle: {
-    fontSize: 14,
-    opacity: 0.8,
-    textAlign: "center",
-    maxWidth: 420,
-  },
+  title: { fontSize: 22, fontWeight: "700", marginBottom: 8, textAlign: "center" },
+  subtitle: { fontSize: 14, opacity: 0.8, marginBottom: 20, textAlign: "center" },
   button: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    borderWidth: 1,
+    paddingVertical: 12, paddingHorizontal: 16, borderRadius: 8,
+    borderWidth: 1, borderColor: "#04233a",
   },
-  buttonText: {
-    fontSize: 16,
-  },
+  buttonText: { fontWeight: "600", color: "#04233a" },
 });
