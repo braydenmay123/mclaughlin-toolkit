@@ -1,7 +1,7 @@
 import 'react-native-gesture-handler';
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Stack, Slot, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
@@ -22,6 +22,18 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   console.log('RootLayout initializing...');
+  const segments = useSegments();
+  const first = Array.isArray(segments) && segments.length > 0 ? segments[0] : '';
+
+  // If we're rendering the isolated 404 group, bypass ALL root providers/wrappers and heavy hooks.
+  if (first === '(404)') {
+    return <Slot />;
+  }
+
+  return <AppRoot />;
+}
+
+function AppRoot() {
   const [loaded, error] = useFonts({
     ...FontAwesome.font,
   });
