@@ -4,6 +4,7 @@ const path = require('path');
 
 const TARGET_DIRS = [
   process.cwd(),                           // repo root (in case HTML is committed)
+  path.join(process.cwd(), 'dist'),        // Expo static export output
   '/vercel/output',                        // Vercel build output root
   '/vercel/output/static',                 // common static dir
 ];
