@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
   },
   hoursDay: {
     fontSize: 16,
-    color: Colors.textPrimary,
+    color: Colors.text,
     fontWeight: '500',
   },
   hoursTime: {
