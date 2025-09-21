@@ -1,10 +1,9 @@
 import React from "react";
 import { View, StyleSheet, Text, Image, ActivityIndicator, TouchableOpacity, Platform } from "react-native";
 import Colors from "@/constants/colors";
-import { router } from "expo-router";
+import { Link } from "expo-router";
 
 export default function AssetMappingScreen() {
-  
   const [isLogoLoading, setIsLogoLoading] = React.useState<boolean>(true);
   const [hasLogoError, setHasLogoError] = React.useState<boolean>(false);
 
@@ -26,14 +25,15 @@ export default function AssetMappingScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity
-          testID="asset-mapping-back"
-          style={styles.backButton}
-          onPress={() => router.back()}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.backText}>{Platform.OS === "web" ? "<" : "←"}</Text>
-        </TouchableOpacity>
+        <Link href="/" asChild>
+          <TouchableOpacity
+            testID="asset-mapping-back"
+            style={styles.backButton}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.backText}>{Platform.OS === "web" ? "<" : "←"}</Text>
+          </TouchableOpacity>
+        </Link>
       </View>
 
       <View style={styles.content}>
