@@ -4,6 +4,20 @@ import Colors from "@/constants/colors";
 import { Link } from "expo-router";
 
 export default function AssetMappingScreen() {
+  const isSSR = typeof window === 'undefined';
+
+  if (isSSR) {
+    return (
+      <View style={styles.container} testID="asset-mapping-ssr">
+        <View style={styles.content}>
+          <Text style={styles.emoji}>🗺️</Text>
+          <Text style={styles.title}>Interactive Asset Mapping</Text>
+          <Text style={styles.subtitle}>Preparing content…</Text>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container} testID="asset-mapping-static">
       <View style={styles.header} />
@@ -14,10 +28,8 @@ export default function AssetMappingScreen() {
         <Text style={styles.description}>
           We’re building a powerful visual portfolio tool. Check back soon.
         </Text>
-        <Link href="/" asChild>
-          <Text accessibilityRole="link" style={styles.link} testID="asset-mapping-home-link">
-            Go Home
-          </Text>
+        <Link href="/">
+          <Text style={styles.link} testID="asset-mapping-home-link">Go Home</Text>
         </Link>
       </View>
     </View>
