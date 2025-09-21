@@ -3,6 +3,35 @@ import { View, StyleSheet, Text, Image, ActivityIndicator, TouchableOpacity, Pla
 import Colors from "@/constants/colors";
 import { Link } from "expo-router";
 
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error: unknown) {
+    console.error('AssetMapping error:', error);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <View style={styles.container} testID="asset-mapping-error">
+          <View style={styles.header}>
+            <View style={styles.backButton} />
+          </View>
+          <View style={styles.content}>
+            <Text style={styles.title}>Interactive Asset Mapping</Text>
+            <Text style={styles.subtitle}>Temporarily unavailable</Text>
+          </View>
+        </View>
+      );
+    }
+    return this.props.children as React.ReactElement;
+  }
+}
+
 export default function AssetMappingScreen() {
   const [isLogoLoading, setIsLogoLoading] = React.useState<boolean>(true);
   const [hasLogoError, setHasLogoError] = React.useState<boolean>(false);
@@ -23,93 +52,95 @@ export default function AssetMappingScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Link href="/" asChild>
-          <TouchableOpacity
-            testID="asset-mapping-back"
-            style={styles.backButton}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.backText}>{Platform.OS === "web" ? "<" : "←"}</Text>
-          </TouchableOpacity>
-        </Link>
-      </View>
+    <ErrorBoundary>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Link href="/" asChild>
+            <TouchableOpacity
+              testID="asset-mapping-back"
+              style={styles.backButton}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.backText}>{Platform.OS === "web" ? "<" : "←"}</Text>
+            </TouchableOpacity>
+          </Link>
+        </View>
 
-      <View style={styles.content}>
-        <View style={styles.logoContainer}>
-          {isLogoLoading && (
-            <ActivityIndicator
-              testID="asset-mapping-logo-loading"
-              size="small"
-              color={Colors.primary}
-              style={styles.loader}
+        <View style={styles.content}>
+          <View style={styles.logoContainer}>
+            {isLogoLoading && (
+              <ActivityIndicator
+                testID="asset-mapping-logo-loading"
+                size="small"
+                color={Colors.primary}
+                style={styles.loader}
+              />
+            )}
+
+            <Image
+              testID="asset-mapping-logo"
+              source={{ uri: "https://mclaughlinfinancial.ca/wp-content/uploads/2024/11/logo.png" }}
+              style={[styles.logo, hasLogoError && styles.hidden]}
+              resizeMode="contain"
+              onLoadStart={() => setIsLogoLoading(true)}
+              onLoadEnd={() => setIsLogoLoading(false)}
+              onError={() => {
+                setHasLogoError(true);
+                setIsLogoLoading(false);
+              }}
+              accessible
+              accessibilityLabel="McLaughlin Financial Group Logo"
             />
-          )}
 
-          <Image
-            testID="asset-mapping-logo"
-            source={{ uri: "https://mclaughlinfinancial.ca/wp-content/uploads/2024/11/logo.png" }}
-            style={[styles.logo, hasLogoError && styles.hidden]}
-            resizeMode="contain"
-            onLoadStart={() => setIsLogoLoading(true)}
-            onLoadEnd={() => setIsLogoLoading(false)}
-            onError={() => {
-              setHasLogoError(true);
-              setIsLogoLoading(false);
-            }}
-            accessible
-            accessibilityLabel="McLaughlin Financial Group Logo"
-          />
-
-          {hasLogoError && (
-            <Text style={styles.fallbackText}>McLaughlin Financial Group</Text>
-          )}
-        </View>
-
-        <View style={styles.iconContainer}>
-          <Text style={styles.mapEmoji} testID="asset-mapping-icon">🗺️</Text>
-        </View>
-
-        <Text style={styles.title}>Interactive Asset Mapping</Text>
-
-        <Text style={styles.subtitle}>Coming Soon</Text>
-
-        <Text style={styles.description}>
-          We’re developing an innovative interactive tool that will help you visualize and optimize your complete financial portfolio. This comprehensive asset mapping feature will include:
-        </Text>
-
-        <View style={styles.featuresList}>
-          <View style={styles.featureItem}>
-            <Text style={styles.featureBullet}>•</Text>
-            <Text style={styles.featureText}>Visual portfolio allocation across all account types</Text>
+            {hasLogoError && (
+              <Text style={styles.fallbackText}>McLaughlin Financial Group</Text>
+            )}
           </View>
-          <View style={styles.featureItem}>
-            <Text style={styles.featureBullet}>•</Text>
-            <Text style={styles.featureText}>Asset class diversification analysis</Text>
-          </View>
-          <View style={styles.featureItem}>
-            <Text style={styles.featureBullet}>•</Text>
-            <Text style={styles.featureText}>Risk assessment and optimization recommendations</Text>
-          </View>
-          <View style={styles.featureItem}>
-            <Text style={styles.featureBullet}>•</Text>
-            <Text style={styles.featureText}>Tax-efficient rebalancing strategies</Text>
-          </View>
-          <View style={styles.featureItem}>
-            <Text style={styles.featureBullet}>•</Text>
-            <Text style={styles.featureText}>Goal-based investment tracking</Text>
-          </View>
-        </View>
 
-        <View style={styles.notifyContainer}>
-          <Text style={styles.notifyTitle}>Stay Updated</Text>
-          <Text style={styles.notifyText}>
-            Contact McLaughlin Financial Group to be notified when this powerful tool becomes available.
+          <View style={styles.iconContainer}>
+            <Text style={styles.mapEmoji} testID="asset-mapping-icon">🗺️</Text>
+          </View>
+
+          <Text style={styles.title}>Interactive Asset Mapping</Text>
+
+          <Text style={styles.subtitle}>Coming Soon</Text>
+
+          <Text style={styles.description}>
+            We’re developing an innovative interactive tool that will help you visualize and optimize your complete financial portfolio. This comprehensive asset mapping feature will include:
           </Text>
+
+          <View style={styles.featuresList}>
+            <View style={styles.featureItem}>
+              <Text style={styles.featureBullet}>•</Text>
+              <Text style={styles.featureText}>Visual portfolio allocation across all account types</Text>
+            </View>
+            <View style={styles.featureItem}>
+              <Text style={styles.featureBullet}>•</Text>
+              <Text style={styles.featureText}>Asset class diversification analysis</Text>
+            </View>
+            <View style={styles.featureItem}>
+              <Text style={styles.featureBullet}>•</Text>
+              <Text style={styles.featureText}>Risk assessment and optimization recommendations</Text>
+            </View>
+            <View style={styles.featureItem}>
+              <Text style={styles.featureBullet}>•</Text>
+              <Text style={styles.featureText}>Tax-efficient rebalancing strategies</Text>
+            </View>
+            <View style={styles.featureItem}>
+              <Text style={styles.featureBullet}>•</Text>
+              <Text style={styles.featureText}>Goal-based investment tracking</Text>
+            </View>
+          </View>
+
+          <View style={styles.notifyContainer}>
+            <Text style={styles.notifyTitle}>Stay Updated</Text>
+            <Text style={styles.notifyText}>
+              Contact McLaughlin Financial Group to be notified when this powerful tool becomes available.
+            </Text>
+          </View>
         </View>
       </View>
-    </View>
+    </ErrorBoundary>
   );
 }
 

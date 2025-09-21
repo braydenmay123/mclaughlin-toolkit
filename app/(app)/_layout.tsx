@@ -15,11 +15,49 @@ const queryClient = new QueryClient();
 
 export default function AppGroupLayout() {
   console.log('AppGroupLayout initializing...');
-  
+  const isSSR = typeof window === 'undefined';
+  if (isSSR) return <SSRAppGroup />;
+  return <ClientAppGroup />;
+}
+
+function SSRAppGroup() {
+  return (
+    <View style={layoutStyles.root} testID="appgroup-ssr-fallback">
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: Colors.background },
+          animation: "fade_from_bottom",
+        }}
+      >
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="calculators" options={{ headerShown: false }} />
+        <Stack.Screen name="calculator" options={{ headerShown: false }} />
+        <Stack.Screen name="tfsa" options={{ headerShown: false }} />
+        <Stack.Screen name="investment" options={{ headerShown: false }} />
+        <Stack.Screen name="advisor" options={{ headerShown: false }} />
+        <Stack.Screen name="rrsp-tax-savings" options={{ headerShown: false }} />
+        <Stack.Screen name="withdrawal-strategy" options={{ headerShown: false }} />
+        <Stack.Screen name="large-purchase" options={{ headerShown: false }} />
+        <Stack.Screen name="tax-calculator" options={{ headerShown: false }} />
+        <Stack.Screen name="asset-mapping" options={{ headerShown: false }} />
+        <Stack.Screen name="asset-map" options={{ headerShown: false }} />
+        <Stack.Screen name="mapping" options={{ headerShown: false }} />
+        <Stack.Screen name="privacy-policy" options={{ headerShown: false }} />
+        <Stack.Screen name="terms-of-service" options={{ headerShown: false }} />
+        <Stack.Screen name="document-portal" options={{ headerShown: false }} />
+        <Stack.Screen name="test" options={{ headerShown: false }} />
+        <Stack.Screen name="modal" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+      </Stack>
+    </View>
+  );
+}
+
+function ClientAppGroup() {
   const [loaded, error] = useFonts({
     ...FontAwesome.font,
   });
-  
+
   console.log('Font loading state:', { loaded, error: error?.message });
 
   useEffect(() => {
@@ -42,20 +80,18 @@ export default function AppGroupLayout() {
   }, [loaded]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const handleError = (event: ErrorEvent) => {
-        console.error('Global error:', event.error);
-      };
-      const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-        console.error('Unhandled promise rejection:', event.reason);
-      };
-      window.addEventListener('error', handleError);
-      window.addEventListener('unhandledrejection', handleUnhandledRejection);
-      return () => {
-        window.removeEventListener('error', handleError);
-        window.removeEventListener('unhandledrejection', handleUnhandledRejection);
-      };
-    }
+    const handleError = (event: ErrorEvent) => {
+      console.error('Global error:', (event as unknown as { error?: unknown })?.error);
+    };
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      console.error('Unhandled promise rejection:', (event as unknown as { reason?: unknown })?.reason);
+    };
+    window.addEventListener('error', handleError as EventListener);
+    window.addEventListener('unhandledrejection', handleUnhandledRejection as EventListener);
+    return () => {
+      window.removeEventListener('error', handleError as EventListener);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection as EventListener);
+    };
   }, []);
 
   if (error) {
@@ -121,15 +157,11 @@ function RootLayoutNav() {
         <Stack.Screen name="asset-mapping" options={{ headerShown: false }} />
         <Stack.Screen name="asset-map" options={{ headerShown: false }} />
         <Stack.Screen name="mapping" options={{ headerShown: false }} />
-
         <Stack.Screen name="privacy-policy" options={{ headerShown: false }} />
         <Stack.Screen name="terms-of-service" options={{ headerShown: false }} />
         <Stack.Screen name="document-portal" options={{ headerShown: false }} />
         <Stack.Screen name="test" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ 
-          presentation: 'modal',
-          animation: 'slide_from_bottom',
-        }} />
+        <Stack.Screen name="modal" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
       </Stack>
     </>
   );
