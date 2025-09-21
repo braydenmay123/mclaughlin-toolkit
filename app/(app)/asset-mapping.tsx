@@ -1,7 +1,7 @@
-import React, { useCallback } from "react";
+import React from "react";
 import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
 import Colors from "@/constants/colors";
-import { useRouter } from "expo-router";
+import { Link } from "expo-router";
 
 export default function AssetMappingScreen() {
   const isSSR = typeof window === 'undefined';
@@ -21,11 +21,6 @@ export default function AssetMappingScreen() {
 }
 
 function ClientAssetMapping() {
-  const router = useRouter();
-  const goHome = useCallback(() => {
-    try { router.replace('/'); } catch (e) { console.error('Navigation error:', e); }
-  }, [router]);
-
   return (
     <View style={styles.container} testID="asset-mapping-static">
       <View style={styles.header} />
@@ -36,9 +31,11 @@ function ClientAssetMapping() {
         <Text style={styles.description}>
           We’re building a powerful visual portfolio tool. Check back soon.
         </Text>
-        <TouchableOpacity onPress={goHome} accessibilityRole="button" testID="asset-mapping-home-btn" style={styles.button}>
-          <Text style={styles.buttonText}>Go Home</Text>
-        </TouchableOpacity>
+        <Link href="/" asChild>
+          <TouchableOpacity accessibilityRole="button" testID="asset-mapping-home-btn" style={styles.button}>
+            <Text style={styles.buttonText}>Go Home</Text>
+          </TouchableOpacity>
+        </Link>
       </View>
     </View>
   );
