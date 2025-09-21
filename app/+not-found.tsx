@@ -3,6 +3,17 @@ import { View, Text, StyleSheet } from "react-native";
 import Colors from "../constants/colors";
 
 export default function NotFoundScreen() {
+  const isSSR = typeof window === 'undefined';
+  if (isSSR) {
+    return (
+      <View style={styles.container} testID="notFoundScreenSSR">
+        <Text style={styles.emoji}>🚧</Text>
+        <Text style={styles.title}>Page not found</Text>
+        <Text style={styles.subtitle}>This page will render after hydration.</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container} testID="notFoundScreen">
       <Text style={styles.emoji}>🚧</Text>

@@ -8,6 +8,21 @@ export default function AssetMappingScreen() {
   const [isLogoLoading, setIsLogoLoading] = React.useState<boolean>(true);
   const [hasLogoError, setHasLogoError] = React.useState<boolean>(false);
 
+  const isSSR = typeof window === 'undefined';
+  if (isSSR) {
+    return (
+      <View style={styles.container} testID="asset-mapping-ssr-fallback">
+        <View style={styles.header}>
+          <View style={styles.backButton} />
+        </View>
+        <View style={styles.content}>
+          <Text style={styles.title}>Interactive Asset Mapping</Text>
+          <Text style={styles.subtitle}>Loading...</Text>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
