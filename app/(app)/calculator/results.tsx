@@ -57,7 +57,7 @@ export default function ResultsScreen() {
 
   // Handle back to calculator
   const handleBackToCalculator = () => {
-    router.push("/calculator");
+    router.push("/(app)/calculator");
   };
 
   // Handle PDF download

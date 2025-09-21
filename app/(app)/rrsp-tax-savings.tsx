@@ -375,7 +375,7 @@ export default function RRSPTaxSavingsScreen() {
         <View style={styles.footerContainer}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => router.push("/")}
+            onPress={() => router.push("/(app)/")}
           >
             <Text style={styles.backButtonText}>Back to Main Menu</Text>
           </TouchableOpacity>

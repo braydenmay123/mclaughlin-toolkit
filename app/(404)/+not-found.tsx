@@ -7,7 +7,7 @@ export default function NotFoundScreen() {
     <View style={styles.cn}>
       <Text accessibilityRole="header" style={styles.h1}>Page not found</Text>
       <Text style={styles.body}>The page you&apos;re looking for doesn&apos;t exist.</Text>
-      <Link href="/" asChild>
+      <Link href="/(app)/" asChild>
         <Pressable accessibilityRole="button" style={styles.btn} testID="go-home-button">
           <Text style={styles.btnText}>Go Home</Text>
         </Pressable>

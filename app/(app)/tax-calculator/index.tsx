@@ -49,7 +49,7 @@ export default function TaxCalculatorScreen() {
 
   const handleUserInfoSubmit = (name: string, email: string) => {
     setUserInfoModalVisible(false);
-    router.push('/tax-calculator/results');
+    router.push('/(app)/tax-calculator/results');
   };
 
   return (
@@ -57,7 +57,7 @@ export default function TaxCalculatorScreen() {
       <View style={styles.headerContainer}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.push('/')}
+          onPress={() => router.push('/(app)/')}
         >
           <ArrowLeft size={20} color="#04233a" />
           <Text style={styles.backButtonText}>Home</Text>

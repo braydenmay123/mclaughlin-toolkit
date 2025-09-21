@@ -187,7 +187,7 @@ export default function EducationHomeScreen() {
           </Text>
           <TouchableOpacity 
             style={styles.ctaButton}
-            onPress={() => router.push('/(tabs)/advisor' as any)}
+            onPress={() => router.push('/(app)/(tabs)/advisor' as any)}
           >
             <Text style={styles.ctaButtonText}>Talk with Joe</Text>
           </TouchableOpacity>
