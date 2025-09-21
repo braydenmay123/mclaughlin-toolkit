@@ -1,6 +1,6 @@
 import { Link } from "expo-router";
 import { View, Text, StyleSheet } from "react-native";
-import Colors from "@/constants/colors";
+import Colors from "../constants/colors";
 
 export default function NotFoundScreen() {
   return (
@@ -8,7 +8,7 @@ export default function NotFoundScreen() {
       <Text style={styles.emoji}>🚧</Text>
       <Text style={styles.title}>Page not found</Text>
       <Text style={styles.subtitle}>The page you’re looking for doesn’t exist.</Text>
-      <Link href="/" style={styles.link} testID="goHomeLink">Go to Home</Link>
+      <Link href="/" testID="goHomeLink"><Text style={styles.link}>Go to Home</Text></Link>
     </View>
   );
 }
