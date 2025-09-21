@@ -1,32 +1,25 @@
-import React from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { Link } from 'expo-router';
+import * as React from "react";
+import { View, Text, Pressable, StyleSheet } from "react-native";
+import { Link } from "expo-router";
 
 export default function NotFoundScreen() {
   return (
-    <View style={s.wrap} testID="not-found-screen">
-      <View style={s.card}>
-        <Text accessibilityRole="header" style={s.h1}>Page not found</Text>
-        <Text style={s.p}>The page you’re looking for doesn’t exist or has moved.</Text>
-        <Link href="/" asChild>
-          <Pressable
-            testID="go-home-button"
-            accessibilityRole="button"
-            style={s.btn}
-          >
-            <Text style={s.btnText}>Go Home</Text>
-          </Pressable>
-        </Link>
-      </View>
+    <View style={styles.cn}>
+      <Text accessibilityRole="header" style={styles.h1}>Page not found</Text>
+      <Text style={styles.body}>The page you&apos;re looking for doesn&apos;t exist.</Text>
+      <Link href="/" asChild>
+        <Pressable accessibilityRole="button" style={styles.btn} testID="go-home-button">
+          <Text style={styles.btnText}>Go Home</Text>
+        </Pressable>
+      </Link>
     </View>
   );
 }
 
-const s = StyleSheet.create({
-  wrap: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, backgroundColor: 'white' },
-  card: { maxWidth: 560 },
-  h1: { fontSize: 24, fontWeight: '700', color: '#04233a', marginBottom: 8 },
-  p: { color: '#04233a', opacity: 0.85, marginBottom: 16 },
-  btn: { borderColor: '#04233a', borderWidth: 1, borderRadius: 8, paddingVertical: 10, paddingHorizontal: 14, alignSelf: 'center' },
-  btnText: { color: '#04233a', fontWeight: '600' },
+const styles = StyleSheet.create({
+  cn: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24 },
+  h1: { fontSize: 22, fontWeight: "700", marginBottom: 8 },
+  body: { fontSize: 16, opacity: 0.8, marginBottom: 20, textAlign: "center" },
+  btn: { paddingVertical: 10, paddingHorizontal: 16, borderRadius: 8, borderWidth: 1 },
+  btnText: { fontSize: 16, fontWeight: "600" }
 });
