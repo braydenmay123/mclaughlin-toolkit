@@ -75,7 +75,7 @@ export default function AdvisorToolsScreen() {
             
             <TouchableOpacity
               style={styles.backButton}
-              onPress={() => router.push("/(app)/")}
+              onPress={() => router.push("/")}
             >
               <Text style={styles.backButtonText}>Back to Main Menu</Text>
             </TouchableOpacity>
@@ -235,7 +235,7 @@ export default function AdvisorToolsScreen() {
         <View style={styles.footerContainer}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => router.push("/(app)/")}
+            onPress={() => router.push("/")}
           >
             <Text style={styles.backButtonText}>Back to Main Menu</Text>
           </TouchableOpacity>

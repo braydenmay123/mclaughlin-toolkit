@@ -83,7 +83,7 @@ export default function TFSACalculatorScreen() {
   const handleUserInfoSubmit = (name: string, email: string) => {
     // Close modal and navigate to results
     setUserInfoModalVisible(false);
-    router.push("/(app)/tfsa/results");
+    router.push("/tfsa/results");
   };
 
   const handleAddContribution = () => {
@@ -330,7 +330,7 @@ export default function TFSACalculatorScreen() {
 
             <TouchableOpacity 
               style={styles.investmentButton} 
-              onPress={() => router.push("/(app)/investment")}
+              onPress={() => router.push("/investment")}
             >
               <Text style={styles.investmentButtonText}>
                 Use Investment Calculator to Project Growth

@@ -20,7 +20,7 @@ export default function BudgetSimulatorScreen() {
   const futureHousingCost = biWeeklyTotalCostOfOwnership + (monthlyInsurance / 2);
 
   const handleComplete = () => {
-    router.push("/(app)/calculator/results");
+    router.push("/calculator/results");
   };
 
   return (

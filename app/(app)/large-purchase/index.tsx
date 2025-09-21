@@ -75,7 +75,7 @@ export default function LargePurchaseScreen() {
 
   const handleUserInfoSubmit = (name: string, email: string) => {
     setUserInfoModalVisible(false);
-    router.push('/(app)/large-purchase/results');
+    router.push('/large-purchase/results');
   };
 
   return (
@@ -83,7 +83,7 @@ export default function LargePurchaseScreen() {
       <View style={styles.headerContainer}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.push('/(app)')}
+          onPress={() => router.push('/')}
         >
           <ArrowLeft size={20} color="#04233a" />
           <Text style={styles.backButtonText}>Home</Text>

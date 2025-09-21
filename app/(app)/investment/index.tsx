@@ -76,7 +76,7 @@ export default function InvestmentCalculatorScreen() {
   const handleUserInfoSubmit = (name?: string, email?: string) => {
     // Close modal and navigate to results
     setUserInfoModalVisible(false);
-    router.push("/(app)/investment/results");
+    router.push("/investment/results");
   };
 
   // Get return rate text based on risk profile
@@ -226,7 +226,7 @@ export default function InvestmentCalculatorScreen() {
 
             <TouchableOpacity 
               style={styles.tfsaButton} 
-              onPress={() => router.push("/(app)/tfsa")}
+              onPress={() => router.push("/tfsa")}
             >
               <Text style={styles.tfsaButtonText}>
                 Check Your TFSA Contribution Room

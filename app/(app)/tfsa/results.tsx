@@ -48,7 +48,7 @@ export default function TFSAResultsScreen() {
 
   // Handle back to calculator
   const handleBackToCalculator = () => {
-    router.push("/(app)/tfsa");
+    router.push("/tfsa");
   };
 
   // Handle PDF download
@@ -250,14 +250,14 @@ export default function TFSAResultsScreen() {
             
             <TouchableOpacity
               style={styles.investmentButton}
-              onPress={() => router.push("/(app)/investment")}
+              onPress={() => router.push("/investment")}
             >
               <Text style={styles.investmentButtonText}>Investment Calculator</Text>
             </TouchableOpacity>
             
             <TouchableOpacity
               style={styles.advisorButton}
-              onPress={() => router.push("/(app)/advisor")}
+              onPress={() => router.push("/advisor")}
             >
               <Text style={styles.advisorButtonText}>Talk with Joe</Text>
             </TouchableOpacity>

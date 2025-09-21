@@ -47,7 +47,7 @@ export default function InvestmentResultsScreen() {
 
   // Handle back to calculator
   const handleBackToCalculator = () => {
-    router.push("/(app)/investment");
+    router.push("/investment");
   };
 
   // Handle PDF download
@@ -235,7 +235,7 @@ export default function InvestmentResultsScreen() {
           
           <TouchableOpacity 
             style={styles.advisorButton}
-            onPress={() => router.push("/(app)/advisor")}
+            onPress={() => router.push("/advisor")}
           >
             <Text style={styles.advisorButtonText}>Schedule Investment Consultation</Text>
           </TouchableOpacity>
