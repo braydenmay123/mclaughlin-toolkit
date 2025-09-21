@@ -6,407 +6,182 @@ import {
   ScrollView,
   StyleSheet,
   Image,
-  ActivityIndicator,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { ChevronDown, ChevronRight, BookOpen, TrendingUp, Shield, Calculator, PiggyBank, Brain } from 'lucide-react-native';
+import { ChevronRight, BookOpen, Home, DollarSign, FileText, Calculator, TrendingUp } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 
-interface Chapter {
+const { width } = Dimensions.get('window');
+
+interface EducationSection {
   id: string;
   title: string;
   description: string;
+  icon: React.ComponentType<{ size: number; color: string }>;
+  color: string;
+  bgColor: string;
   slug: string;
-  duration: string;
+  estimatedTime: string;
 }
 
-interface Section {
-  id: string;
-  title: string;
-  icon: React.ComponentType<any>;
-  description: string;
-  chapters: Chapter[];
-}
-
-const educationSections: Section[] = [
+const educationSections: EducationSection[] = [
   {
-    id: 'foundations',
-    title: 'Foundational Topics',
-    icon: BookOpen,
-    description: 'Essential concepts every investor should understand',
-    chapters: [
-      {
-        id: 'investing-basics',
-        title: 'Investing Basics',
-        description: 'A gentle intro to risk, return, and diversification',
-        slug: 'investing-basics',
-        duration: '5 min read',
-      },
-      {
-        id: 'compound-growth',
-        title: 'Power of Compound Growth',
-        description: 'See how starting early can dramatically impact your wealth',
-        slug: 'compound-growth',
-        duration: '4 min read',
-      },
-    ],
+    id: 'getting-started',
+    title: 'Getting Started',
+    description: 'Essential first steps for home buying in Canada',
+    icon: Home,
+    color: Colors.primary,
+    bgColor: Colors.primaryLight,
+    slug: 'getting-started',
+    estimatedTime: '10 min read',
   },
   {
-    id: 'accounts',
-    title: 'Investment Accounts in Canada',
-    icon: PiggyBank,
-    description: 'Understanding your account options and their benefits',
-    chapters: [
-      {
-        id: 'tfsa-basics',
-        title: 'Understanding the TFSA',
-        description: 'How it works, withdrawals, contribution room, and common mistakes',
-        slug: 'tfsa-basics',
-        duration: '6 min read',
-      },
-      {
-        id: 'rrsp-basics',
-        title: 'RRSP Basics',
-        description: 'Tax-deferred growth, contribution room, and withdrawal strategies',
-        slug: 'rrsp-basics',
-        duration: '7 min read',
-      },
-      {
-        id: 'fhsa-guide',
-        title: 'FHSA — First Home Savings Account',
-        description: 'Eligibility, contributions, and pairing with RRSP HBP',
-        slug: 'fhsa-guide',
-        duration: '5 min read',
-      },
-      {
-        id: 'resp-guide',
-        title: 'RESP — Saving for Education',
-        description: 'Grants, rules, contributions, and withdrawals',
-        slug: 'resp-guide',
-        duration: '6 min read',
-      },
-      {
-        id: 'rdsp-guide',
-        title: 'RDSP — Disability Savings',
-        description: 'Grants, bonds, eligibility, and withdrawals',
-        slug: 'rdsp-guide',
-        duration: '5 min read',
-      },
-      {
-        id: 'non-registered',
-        title: 'Non-Registered Investment Accounts',
-        description: 'When to use and basic tax treatment',
-        slug: 'non-registered',
-        duration: '4 min read',
-      },
-    ],
+    id: 'budgeting',
+    title: 'Budgeting & Saving',
+    description: 'How much house can you afford and saving strategies',
+    icon: DollarSign,
+    color: Colors.secondary,
+    bgColor: Colors.secondaryLight,
+    slug: 'budgeting',
+    estimatedTime: '15 min read',
   },
   {
-    id: 'investments',
-    title: 'Types of Investments Explained',
-    icon: TrendingUp,
-    description: 'Understanding different investment vehicles and their characteristics',
-    chapters: [
-      {
-        id: 'mutual-funds',
-        title: 'Mutual Funds',
-        description: 'Pooled investing, pros and cons, fees',
-        slug: 'mutual-funds',
-        duration: '4 min read',
-      },
-      {
-        id: 'etf-basics',
-        title: 'ETFs',
-        description: 'Index investing, liquidity, MERs',
-        slug: 'etf-basics',
-        duration: '4 min read',
-      },
-      {
-        id: 'gic-basics',
-        title: 'GICs',
-        description: 'Guarantees, terms, and when they fit',
-        slug: 'gic-basics',
-        duration: '3 min read',
-      },
-      {
-        id: 'stocks-basics',
-        title: 'Stocks',
-        description: 'Ownership, volatility, and long-term returns',
-        slug: 'stocks-basics',
-        duration: '5 min read',
-      },
-      {
-        id: 'bonds-explained',
-        title: 'Bonds',
-        description: 'Income, duration, and interest rate risk',
-        slug: 'bonds-explained',
-        duration: '4 min read',
-      },
-      {
-        id: 'compounding',
-        title: 'Compounding',
-        description: 'Reinvesting returns to grow faster',
-        slug: 'compound-growth',
-        duration: '3 min read',
-      },
-    ],
-  },
-  {
-    id: 'planning',
-    title: 'Financial Planning Basics',
+    id: 'mortgage-basics',
+    title: 'Mortgage Basics',
+    description: 'Understanding mortgages, rates, and pre-approval',
     icon: Calculator,
-    description: 'Building a solid financial foundation',
-    chapters: [
-      {
-        id: 'emergency-funds',
-        title: 'Emergency Funds — Why They Matter',
-        description: 'How much you need and where to keep it',
-        slug: 'emergency-funds',
-        duration: '4 min read',
-      },
-      {
-        id: 'budgeting',
-        title: 'Budgeting & Cash Flow',
-        description: 'Simple frameworks including the 50/30/20 rule',
-        slug: 'budgeting',
-        duration: '6 min read',
-      },
-      {
-        id: 'financial-goals',
-        title: 'Setting Financial Goals',
-        description: 'Short, medium, and long-term goal setting strategies',
-        slug: 'financial-goals',
-        duration: '5 min read',
-      },
-      {
-        id: 'debt-vs-investing',
-        title: 'Debt vs. Investing',
-        description: 'Rules of thumb and interest rate breakpoints for decision making',
-        slug: 'debt-vs-investing',
-        duration: '5 min read',
-      },
-    ],
+    color: Colors.accent,
+    bgColor: Colors.accentLight,
+    slug: 'mortgage-basics',
+    estimatedTime: '20 min read',
   },
   {
-    id: 'insurance',
-    title: 'Insurance Fundamentals',
-    icon: Shield,
-    description: 'Protecting your financial future',
-    chapters: [
-      {
-        id: 'life-insurance-types',
-        title: 'Life Insurance Types — Term / Whole / Universal',
-        description: 'Understanding the differences and when each makes sense',
-        slug: 'life-insurance-types',
-        duration: '7 min read',
-      },
-      {
-        id: 'why-insurance',
-        title: 'Why Insurance',
-        description: 'When and why coverage matters',
-        slug: 'why-insurance',
-        duration: '4 min read',
-      },
-      {
-        id: 'ci-di',
-        title: 'Critical Illness & Disability',
-        description: 'What these coverages do and why they matter',
-        slug: 'ci-di',
-        duration: '5 min read',
-      },
-      {
-        id: 'insurance-coverage',
-        title: 'How Much Insurance Do You Need?',
-        description: 'Simple frameworks for determining appropriate coverage levels',
-        slug: 'insurance-coverage',
-        duration: '5 min read',
-      },
-    ],
-  },
-  {
-    id: 'taxes-retirement',
-    title: 'Taxes & Retirement',
+    id: 'home-search',
+    title: 'Finding Your Home',
+    description: 'Tips for searching and evaluating properties',
     icon: BookOpen,
-    description: 'Understand investment taxes and retirement income basics',
-    chapters: [
-      {
-        id: 'investment-taxation',
-        title: 'Capital Gains, Dividends, Interest',
-        description: 'How different investment income is taxed in Canada',
-        slug: 'investment-taxation',
-        duration: '6 min read',
-      },
-      {
-        id: 'retirement-basics',
-        title: 'Retirement Basics',
-        description: 'How much you need and income sources',
-        slug: 'retirement-basics',
-        duration: '4 min read',
-      },
-      {
-        id: 'cpp-oas',
-        title: 'CPP & OAS',
-        description: 'What they are, when to take them, and clawbacks',
-        slug: 'cpp-oas',
-        duration: '4 min read',
-      },
-    ],
+    color: Colors.success,
+    bgColor: Colors.successLight,
+    slug: 'home-search',
+    estimatedTime: '12 min read',
   },
   {
-    id: 'mindset',
-    title: 'Investor Mindset',
-    icon: Brain,
-    description: 'Developing the right psychological approach to investing',
-    chapters: [
-      {
-        id: 'staying-invested',
-        title: 'Staying Invested',
-        description: 'The importance of discipline and long-term thinking',
-        slug: 'staying-invested',
-        duration: '4 min read',
-      },
-      {
-        id: 'risk-vs-reward',
-        title: 'Risk vs. Reward',
-        description: 'Understanding the relationship and finding your comfort zone',
-        slug: 'risk-vs-reward',
-        duration: '5 min read',
-      },
-      {
-        id: 'investing-mistakes',
-        title: 'Common Investing Mistakes',
-        description: 'Pitfalls to avoid and how to stay on track',
-        slug: 'investing-mistakes',
-        duration: '6 min read',
-      },
-    ],
+    id: 'legal-process',
+    title: 'Legal Process',
+    description: 'Offers, inspections, and closing procedures',
+    icon: FileText,
+    color: Colors.warning,
+    bgColor: Colors.warningLight,
+    slug: 'legal-process',
+    estimatedTime: '18 min read',
+  },
+  {
+    id: 'investment-strategies',
+    title: 'Investment Strategies',
+    description: 'Building wealth through real estate',
+    icon: TrendingUp,
+    color: Colors.info,
+    bgColor: Colors.infoLight,
+    slug: 'investment-strategies',
+    estimatedTime: '25 min read',
   },
 ];
 
-export default function EducationCentre() {
+export default function EducationHomeScreen() {
   const router = useRouter();
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['foundations']));
-  const [isLogoLoading, setIsLogoLoading] = useState(true);
-  const [hasLogoError, setHasLogoError] = useState(false);
+  const [selectedSection, setSelectedSection] = useState<string | null>(null);
 
-  const toggleSection = (sectionId: string) => {
-    const newExpanded = new Set(expandedSections);
-    if (newExpanded.has(sectionId)) {
-      newExpanded.delete(sectionId);
-    } else {
-      newExpanded.add(sectionId);
-    }
-    setExpandedSections(newExpanded);
-  };
-
-  const navigateToChapter = (slug: string) => {
-    router.push(`/education/${slug}` as any);
+  const handleSectionPress = (section: EducationSection) => {
+    setSelectedSection(section.id);
+    setTimeout(() => {
+      router.push(`/education/${section.slug}` as any);
+      setSelectedSection(null);
+    }, 150);
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'right', 'left']}>
-      <ScrollView
+    <SafeAreaView style={styles.container}>
+      <ScrollView 
+        style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.logoContainer}>
-          {isLogoLoading && (
-            <ActivityIndicator size="small" color={Colors.primary} style={styles.loader} />
-          )}
-          
-          <Image
-            source={{ 
-              uri: "https://mclaughlinfinancial.ca/wp-content/uploads/2024/11/logo.png",
-              cache: "force-cache" 
-            }}
-            style={[styles.logo, hasLogoError && styles.hidden]}
-            resizeMode="contain"
-            onLoadStart={() => setIsLogoLoading(true)}
-            onLoadEnd={() => setIsLogoLoading(false)}
-            onError={() => {
-              setHasLogoError(true);
-              setIsLogoLoading(false);
-            }}
-          />
-          
-          {hasLogoError && (
-            <Text style={styles.fallbackText}>McLaughlin Financial Group</Text>
-          )}
+        <View style={styles.header}>
+          <View style={styles.heroImageContainer}>
+            <Image 
+              source={{ uri: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=200&fit=crop&crop=center' }}
+              style={styles.heroImage}
+              resizeMode="cover"
+            />
+            <View style={styles.heroOverlay}>
+              <Text style={styles.heroTitle}>Home Buying Guide</Text>
+              <Text style={styles.heroSubtitle}>
+                Your complete guide to buying your first home in Canada
+              </Text>
+            </View>
+          </View>
         </View>
 
-        <View style={styles.titleContainer}>
-          <Text style={styles.title}>Education Centre</Text>
-          <Text style={styles.subtitle}>
-            Comprehensive financial education to help you make informed decisions
+        <View style={styles.introContainer}>
+          <Text style={styles.introTitle}>Learn at Your Own Pace</Text>
+          <Text style={styles.introText}>
+            Navigate the Canadian real estate market with confidence. Our comprehensive guides cover everything from budgeting to closing day.
           </Text>
         </View>
 
         <View style={styles.sectionsContainer}>
+          <Text style={styles.sectionTitle}>Choose a Topic</Text>
           {educationSections.map((section) => {
-            const isExpanded = expandedSections.has(section.id);
             const IconComponent = section.icon;
-
+            const isSelected = selectedSection === section.id;
             return (
-              <View key={section.id} style={styles.sectionContainer}>
-                <TouchableOpacity
-                  style={styles.sectionHeader}
-                  onPress={() => toggleSection(section.id)}
-                  activeOpacity={0.7}
-                >
-                  <View style={styles.sectionHeaderLeft}>
-                    <View style={styles.sectionIconContainer}>
-                      <IconComponent size={24} color={Colors.primary} />
+              <TouchableOpacity
+                key={section.id}
+                style={[
+                  styles.sectionCard,
+                  { backgroundColor: section.bgColor },
+                  isSelected && styles.sectionCardSelected
+                ]}
+                onPress={() => handleSectionPress(section)}
+                activeOpacity={0.7}
+                testID={`education-section-${section.id}`}
+              >
+                <View style={styles.sectionContent}>
+                  <View style={[styles.sectionIcon, { backgroundColor: section.color }]}>
+                    <IconComponent size={24} color="white" />
+                  </View>
+                  <View style={styles.sectionText}>
+                    <View style={styles.sectionHeader}>
+                      <Text style={[styles.sectionCardTitle, { color: section.color }]}> 
+                        {section.title}
+                      </Text>
+                      <Text style={styles.estimatedTime}>
+                        {section.estimatedTime}
+                      </Text>
                     </View>
-                    <View style={styles.sectionHeaderText}>
-                      <Text style={styles.sectionTitle}>{section.title}</Text>
-                      <Text style={styles.sectionDescription}>{section.description}</Text>
-                    </View>
+                    <Text style={styles.sectionDescription}>
+                      {section.description}
+                    </Text>
                   </View>
-                  <View style={styles.expandIcon}>
-                    {isExpanded ? (
-                      <ChevronDown size={20} color={Colors.textSecondary} />
-                    ) : (
-                      <ChevronRight size={20} color={Colors.textSecondary} />
-                    )}
-                  </View>
-                </TouchableOpacity>
-
-                {isExpanded && (
-                  <View style={styles.chaptersContainer}>
-                    {section.chapters.map((chapter) => (
-                      <TouchableOpacity
-                        key={chapter.id}
-                        style={styles.chapterCard}
-                        onPress={() => navigateToChapter(chapter.slug)}
-                        activeOpacity={0.7}
-                      >
-                        <View style={styles.chapterContent}>
-                          <Text style={styles.chapterTitle}>{chapter.title}</Text>
-                          <Text style={styles.chapterDescription}>{chapter.description}</Text>
-                          <Text style={styles.chapterDuration}>{chapter.duration}</Text>
-                        </View>
-                        <View style={styles.chapterArrow}>
-                          <ChevronRight size={16} color={Colors.primary} />
-                        </View>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                )}
-              </View>
+                  <ChevronRight size={20} color={section.color} />
+                </View>
+              </TouchableOpacity>
             );
           })}
         </View>
 
-        <View style={styles.footerContainer}>
-          <Text style={styles.footerText}>
-            Have questions about any of these topics? Our advisors are here to help.
+        <View style={styles.ctaContainer}>
+          <Text style={styles.ctaTitle}>Need Personal Guidance?</Text>
+          <Text style={styles.ctaText}>
+            Connect with Joe McLaughlin for personalized advice on your home buying journey.
           </Text>
-          <TouchableOpacity
-            style={styles.contactButton}
-            onPress={() => router.push('/modal' as any)}
+          <TouchableOpacity 
+            style={styles.ctaButton}
+            onPress={() => router.push('/(tabs)/advisor' as any)}
           >
-            <Text style={styles.contactButtonText}>Contact an Advisor</Text>
+            <Text style={styles.ctaButtonText}>Talk with Joe</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -417,179 +192,158 @@ export default function EducationCentre() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.backgroundAlt,
+    backgroundColor: Colors.background,
   },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: 40,
-  },
-  logoContainer: {
-    alignItems: 'center',
-    marginTop: 24,
-    marginBottom: 20,
-    position: 'relative',
-    height: 70,
-  },
-  loader: {
-    position: 'absolute',
-    top: 25,
-  },
-  logo: {
-    width: 260,
-    height: 70,
-  },
-  hidden: {
-    display: 'none',
-  },
-  fallbackText: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: Colors.primary,
-    letterSpacing: 0.5,
-  },
-  titleContainer: {
-    paddingHorizontal: 24,
-    marginBottom: 32,
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: Colors.primary,
-    textAlign: 'center',
-    marginBottom: 12,
-    letterSpacing: -0.5,
-  },
-  subtitle: {
-    fontSize: 17,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 26,
-    maxWidth: '90%',
-    fontWeight: '400',
-  },
-  sectionsContainer: {
-    paddingHorizontal: 20,
-  },
-  sectionContainer: {
-    marginBottom: 16,
-    backgroundColor: Colors.backgroundCard,
-    borderRadius: 16,
-    overflow: 'hidden',
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 6,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 20,
-  },
-  sectionHeaderLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  scrollView: {
     flex: 1,
   },
-  sectionIconContainer: {
+  scrollContent: {
+    paddingBottom: 40,
+  },
+  header: {
+    marginBottom: 24,
+  },
+  heroImageContainer: {
+    height: 200,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  heroImage: {
+    width: '100%',
+    height: '100%',
+  },
+  heroOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(4, 35, 58, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  heroTitle: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: 'white',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  heroSubtitle: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.9)',
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  introContainer: {
+    paddingHorizontal: 24,
+    marginBottom: 32,
+  },
+  introTitle: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: Colors.primary,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  introText: {
+    fontSize: 16,
+    color: Colors.textSecondary,
+    lineHeight: 24,
+    textAlign: 'center',
+  },
+  sectionsContainer: {
+    paddingHorizontal: 24,
+    marginBottom: 32,
+  },
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: '600',
+    color: Colors.primary,
+    marginBottom: 20,
+  },
+  sectionCard: {
+    borderRadius: 16,
+    marginBottom: 16,
+    padding: 20,
+    shadowColor: Colors.shadowMedium,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  sectionCardSelected: {
+    transform: [{ scale: 0.98 }],
+  },
+  sectionContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  sectionIcon: {
     width: 48,
     height: 48,
-    borderRadius: 12,
-    backgroundColor: Colors.accentLight,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
-    borderWidth: 1,
-    borderColor: Colors.accent,
   },
-  sectionHeaderText: {
+  sectionText: {
     flex: 1,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: Colors.primary,
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
     marginBottom: 4,
-    letterSpacing: -0.2,
+  },
+  sectionCardTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    flex: 1,
+    paddingRight: 8,
+  },
+  estimatedTime: {
+    fontSize: 12,
+    color: Colors.textLight,
+    fontWeight: '500',
   },
   sectionDescription: {
     fontSize: 14,
     color: Colors.textSecondary,
     lineHeight: 20,
   },
-  expandIcon: {
-    marginLeft: 12,
-  },
-  chaptersContainer: {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  },
-  chapterCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.backgroundAlt,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
-  },
-  chapterContent: {
-    flex: 1,
-  },
-  chapterTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.primary,
-    marginBottom: 4,
-    letterSpacing: -0.1,
-  },
-  chapterDescription: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    lineHeight: 20,
-    marginBottom: 6,
-  },
-  chapterDuration: {
-    fontSize: 12,
-    color: Colors.textMuted,
-    fontWeight: '500',
-  },
-  chapterArrow: {
-    marginLeft: 12,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: Colors.accent,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  footerContainer: {
+  ctaContainer: {
     paddingHorizontal: 24,
     paddingVertical: 32,
+    backgroundColor: Colors.primaryLight,
+    marginHorizontal: 24,
+    borderRadius: 16,
     alignItems: 'center',
   },
-  footerText: {
+  ctaTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: Colors.primary,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  ctaText: {
     fontSize: 16,
     color: Colors.textSecondary,
     textAlign: 'center',
+    lineHeight: 22,
     marginBottom: 20,
-    lineHeight: 24,
   },
-  contactButton: {
+  ctaButton: {
     backgroundColor: Colors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
-    borderRadius: 12,
+    borderRadius: 8,
   },
-  contactButtonText: {
+  ctaButtonText: {
+    color: 'white',
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.background,
-    letterSpacing: -0.1,
   },
 });
