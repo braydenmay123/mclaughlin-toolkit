@@ -24,7 +24,7 @@ const isSmallScreen = screenWidth < 375;
 interface UserInfoModalProps {
   visible: boolean;
   onClose: () => void;
-  onSubmit: (name?: string, email?: string) => void;
+  onSubmit: (name: string, email: string) => void;
   calculatorType?: string;
   results?: any;
   isLoading?: boolean;

@@ -35,6 +35,9 @@ const { width: screenWidth } = Dimensions.get('window');
 const isSmallScreen = screenWidth < 375;
 
 interface InteractiveBudgetSimulatorProps {
+  monthlyIncome?: number;
+  futureHousingCost?: number;
+  currentRent?: number;
   onComplete: () => void;
 }
 

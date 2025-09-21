@@ -75,7 +75,7 @@ export default function LargePurchaseScreen() {
 
   const handleUserInfoSubmit = (name: string, email: string) => {
     setUserInfoModalVisible(false);
-    router.push('/(app)/large-purchase/results');
+    router.push('/large-purchase/results');
   };
 
   return (
