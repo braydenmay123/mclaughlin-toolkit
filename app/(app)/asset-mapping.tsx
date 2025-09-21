@@ -1,10 +1,10 @@
 import React from "react";
 import { View, StyleSheet, Text, Image, ActivityIndicator, TouchableOpacity, Platform } from "react-native";
 import Colors from "@/constants/colors";
-import { useRouter } from "expo-router";
+import { router } from "expo-router";
 
 export default function AssetMappingScreen() {
-  const router = useRouter();
+  
   const [isLogoLoading, setIsLogoLoading] = React.useState<boolean>(true);
   const [hasLogoError, setHasLogoError] = React.useState<boolean>(false);
 
