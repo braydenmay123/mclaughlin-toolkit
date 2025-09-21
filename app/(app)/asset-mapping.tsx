@@ -1,38 +1,40 @@
 import React from "react";
-import { View, StyleSheet, Text, Image, ActivityIndicator, TouchableOpacity } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Map, ArrowLeft } from "lucide-react-native";
+import { View, StyleSheet, Text, Image, ActivityIndicator, TouchableOpacity, Platform } from "react-native";
 import Colors from "@/constants/colors";
 import { useRouter } from "expo-router";
 
 export default function AssetMappingScreen() {
   const router = useRouter();
-  const [isLogoLoading, setIsLogoLoading] = React.useState(true);
-  const [hasLogoError, setHasLogoError] = React.useState(false);
+  const [isLogoLoading, setIsLogoLoading] = React.useState<boolean>(true);
+  const [hasLogoError, setHasLogoError] = React.useState<boolean>(false);
 
   return (
-    <SafeAreaView style={styles.container} edges={["top", "right", "left"]}>
+    <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton} 
+        <TouchableOpacity
+          testID="asset-mapping-back"
+          style={styles.backButton}
           onPress={() => router.back()}
           activeOpacity={0.7}
         >
-          <ArrowLeft size={24} color={Colors.primary} />
+          <Text style={styles.backText}>{Platform.OS === "web" ? "<" : "←"}</Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.content}>
         <View style={styles.logoContainer}>
           {isLogoLoading && (
-            <ActivityIndicator size="small" color={Colors.primary} style={styles.loader} />
+            <ActivityIndicator
+              testID="asset-mapping-logo-loading"
+              size="small"
+              color={Colors.primary}
+              style={styles.loader}
+            />
           )}
-          
+
           <Image
-            source={{ 
-              uri: "https://mclaughlinfinancial.ca/wp-content/uploads/2024/11/logo.png",
-              cache: "force-cache" 
-            }}
+            testID="asset-mapping-logo"
+            source={{ uri: "https://mclaughlinfinancial.ca/wp-content/uploads/2024/11/logo.png" }}
             style={[styles.logo, hasLogoError && styles.hidden]}
             resizeMode="contain"
             onLoadStart={() => setIsLogoLoading(true)}
@@ -41,23 +43,25 @@ export default function AssetMappingScreen() {
               setHasLogoError(true);
               setIsLogoLoading(false);
             }}
+            accessible
+            accessibilityLabel="McLaughlin Financial Group Logo"
           />
-          
+
           {hasLogoError && (
             <Text style={styles.fallbackText}>McLaughlin Financial Group</Text>
           )}
         </View>
 
         <View style={styles.iconContainer}>
-          <Map size={80} color={Colors.primary} />
+          <Text style={styles.mapEmoji} testID="asset-mapping-icon">🗺️</Text>
         </View>
 
         <Text style={styles.title}>Interactive Asset Mapping</Text>
-        
+
         <Text style={styles.subtitle}>Coming Soon</Text>
-        
+
         <Text style={styles.description}>
-          We&apos;re developing an innovative interactive tool that will help you visualize and optimize your complete financial portfolio. This comprehensive asset mapping feature will include:
+          We’re developing an innovative interactive tool that will help you visualize and optimize your complete financial portfolio. This comprehensive asset mapping feature will include:
         </Text>
 
         <View style={styles.featuresList}>
@@ -90,7 +94,7 @@ export default function AssetMappingScreen() {
           </Text>
         </View>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -115,6 +119,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
+  },
+  backText: {
+    fontSize: 18,
+    color: Colors.primary,
+    fontWeight: "700" as const,
   },
   content: {
     flex: 1,
@@ -141,7 +150,7 @@ const styles = StyleSheet.create({
   },
   fallbackText: {
     fontSize: 20,
-    fontWeight: "700",
+    fontWeight: "700" as const,
     color: Colors.primary,
     letterSpacing: 0.3,
   },
@@ -156,9 +165,12 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: Colors.accent,
   },
+  mapEmoji: {
+    fontSize: 56,
+  },
   title: {
     fontSize: 28,
-    fontWeight: "800",
+    fontWeight: "800" as const,
     color: Colors.primary,
     textAlign: "center",
     marginBottom: 8,
@@ -166,7 +178,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 20,
-    fontWeight: "600",
+    fontWeight: "600" as const,
     color: Colors.textSecondary,
     textAlign: "center",
     marginBottom: 24,
@@ -192,7 +204,7 @@ const styles = StyleSheet.create({
   featureBullet: {
     fontSize: 16,
     color: Colors.primary,
-    fontWeight: "bold",
+    fontWeight: "700" as const,
     marginRight: 12,
     marginTop: 2,
   },
@@ -218,7 +230,7 @@ const styles = StyleSheet.create({
   },
   notifyTitle: {
     fontSize: 18,
-    fontWeight: "700",
+    fontWeight: "700" as const,
     color: Colors.primary,
     textAlign: "center",
     marginBottom: 12,
