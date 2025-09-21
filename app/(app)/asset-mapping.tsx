@@ -1,11 +1,10 @@
-import React from "react";
-import { View, StyleSheet, Text } from "react-native";
+import React, { useCallback } from "react";
+import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
 import Colors from "@/constants/colors";
-import { Link } from "expo-router";
+import { useRouter } from "expo-router";
 
 export default function AssetMappingScreen() {
   const isSSR = typeof window === 'undefined';
-
   if (isSSR) {
     return (
       <View style={styles.container} testID="asset-mapping-ssr">
@@ -18,6 +17,15 @@ export default function AssetMappingScreen() {
     );
   }
 
+  return <ClientAssetMapping />;
+}
+
+function ClientAssetMapping() {
+  const router = useRouter();
+  const goHome = useCallback(() => {
+    try { router.replace('/'); } catch (e) { console.error('Navigation error:', e); }
+  }, [router]);
+
   return (
     <View style={styles.container} testID="asset-mapping-static">
       <View style={styles.header} />
@@ -28,9 +36,9 @@ export default function AssetMappingScreen() {
         <Text style={styles.description}>
           We’re building a powerful visual portfolio tool. Check back soon.
         </Text>
-        <Link href="/">
-          <Text style={styles.link} testID="asset-mapping-home-link">Go Home</Text>
-        </Link>
+        <TouchableOpacity onPress={goHome} accessibilityRole="button" testID="asset-mapping-home-btn" style={styles.button}>
+          <Text style={styles.buttonText}>Go Home</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -75,8 +83,14 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     maxWidth: 360,
   },
-  link: {
-    color: Colors.primary,
+  button: {
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  buttonText: {
+    color: Colors.background,
     fontSize: 16,
     fontWeight: "700" as const,
   },
