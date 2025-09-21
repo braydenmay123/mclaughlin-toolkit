@@ -17,9 +17,15 @@ function scan(dir) {
 scan(appDir);
 
 if (found.length > 0) {
-  console.warn('\n[no-not-found-route] Detected +not-found route files:');
-  for (const f of found) console.warn(' - ' + path.relative(process.cwd(), f));
-  console.warn('\nProceeding without blocking. Ensure these pages are SSR-safe.');
+  console.warn('\n[no-not-found-route] Removing +not-found route files before static export:');
+  for (const f of found) {
+    try {
+      fs.unlinkSync(f);
+      console.warn(' - removed ' + path.relative(process.cwd(), f));
+    } catch (e) {
+      console.warn(' - failed to remove ' + path.relative(process.cwd(), f) + ': ' + e.message);
+    }
+  }
   process.exit(0);
 } else {
   console.log('OK: no +not-found routes under /app.');
