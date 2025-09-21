@@ -13,9 +13,6 @@ import { trpc, trpcClient } from "@/lib/trpc";
 
 const queryClient = new QueryClient();
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
-
 export default function AppGroupLayout() {
   console.log('AppGroupLayout initializing...');
   
@@ -32,12 +29,18 @@ export default function AppGroupLayout() {
   }, [error]);
 
   useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync().catch(console.error);
-    }
+    let cancelled = false;
+    (async () => {
+      try {
+        await SplashScreen.preventAutoHideAsync();
+      } catch {}
+      if (loaded && !cancelled) {
+        try { await SplashScreen.hideAsync(); } catch {}
+      }
+    })();
+    return () => { cancelled = true; };
   }, [loaded]);
 
-  // Add global error handler for web
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const handleError = (event: ErrorEvent) => {
@@ -46,10 +49,8 @@ export default function AppGroupLayout() {
       const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
         console.error('Unhandled promise rejection:', event.reason);
       };
-      
       window.addEventListener('error', handleError);
       window.addEventListener('unhandledrejection', handleUnhandledRejection);
-      
       return () => {
         window.removeEventListener('error', handleError);
         window.removeEventListener('unhandledrejection', handleUnhandledRejection);
@@ -77,7 +78,7 @@ export default function AppGroupLayout() {
 
   try {
     return (
-      <GestureHandlerRootView style={{ flex: 1 }}>
+      <GestureHandlerRootView style={layoutStyles.root}>
         <trpc.Provider client={trpcClient} queryClient={queryClient}>
           <QueryClientProvider client={queryClient}>
             <RootLayoutNav />
@@ -154,4 +155,8 @@ const errorStyles = StyleSheet.create({
     color: Colors.textSecondary,
     textAlign: 'center',
   },
+});
+
+const layoutStyles = StyleSheet.create({
+  root: { flex: 1 },
 });

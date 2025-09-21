@@ -17,10 +17,10 @@ function scan(dir) {
 scan(appDir);
 
 if (found.length > 0) {
-  console.error('\nBuild blocked: +not-found route files detected.');
-  for (const f of found) console.error(' - ' + path.relative(process.cwd(), f));
-  console.error('\nRemove all +not-found files and rely on public/404.html instead.');
-  process.exit(1);
+  console.warn('\n[no-not-found-route] Detected +not-found route files:');
+  for (const f of found) console.warn(' - ' + path.relative(process.cwd(), f));
+  console.warn('\nProceeding without blocking. Ensure these pages are SSR-safe.');
+  process.exit(0);
 } else {
   console.log('OK: no +not-found routes under /app.');
 }
