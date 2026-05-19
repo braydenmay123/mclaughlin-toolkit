@@ -42,7 +42,6 @@ function SSRAppGroup() {
         <Stack.Screen name="privacy-policy" options={{ headerShown: false }} />
         <Stack.Screen name="terms-of-service" options={{ headerShown: false }} />
         <Stack.Screen name="document-portal" options={{ headerShown: false }} />
-        <Stack.Screen name="test" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
       </Stack>
     </View>
@@ -124,7 +123,6 @@ function RootLayoutNav() {
         <Stack.Screen name="privacy-policy" options={{ headerShown: false }} />
         <Stack.Screen name="terms-of-service" options={{ headerShown: false }} />
         <Stack.Screen name="document-portal" options={{ headerShown: false }} />
-        <Stack.Screen name="test" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
       </Stack>
     </>
