@@ -9,11 +9,11 @@ import {
   Alert,
   ActivityIndicator,
   Switch,
-  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { ArrowLeft, ArrowRight, Shield, Heart, Home } from 'lucide-react-native';
+import AssetMapHeader from '@/components/mapping/AssetMapHeader';
 import { Picker } from '@react-native-picker/picker';
 import Colors from '@/constants/colors';
 import {
@@ -35,8 +35,6 @@ export default function AssetMapInsurance() {
   const router = useRouter();
   const [assetMapData, setAssetMapData] = useState<AssetMapData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLogoLoading, setIsLogoLoading] = useState(true);
-  const [hasLogoError, setHasLogoError] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -137,49 +135,17 @@ export default function AssetMapInsurance() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'right', 'left']}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={handleBack}
-        >
-          <ArrowLeft size={24} color={Colors.primary} />
-        </TouchableOpacity>
-        <View style={styles.headerCenter}>
-          <Text style={styles.headerTitle}>Step 3: Insurance</Text>
-          <Text style={styles.headerSubtitle}>Protection Coverage</Text>
-        </View>
-        <View style={styles.placeholder} />
-      </View>
+      <AssetMapHeader
+        step={3}
+        title="Insurance"
+        subtitle="Step 3 of 4"
+        onBack={handleBack}
+      />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.logoContainer}>
-          {isLogoLoading && (
-            <ActivityIndicator size="small" color={Colors.primary} style={styles.loader} />
-          )}
-          
-          <Image
-            source={{ 
-              uri: "https://mclaughlinfinancial.ca/wp-content/uploads/2024/11/logo.png",
-              cache: "force-cache" 
-            }}
-            style={[styles.logo, hasLogoError && styles.hidden]}
-            resizeMode="contain"
-            onLoadStart={() => setIsLogoLoading(true)}
-            onLoadEnd={() => setIsLogoLoading(false)}
-            onError={() => {
-              setHasLogoError(true);
-              setIsLogoLoading(false);
-            }}
-          />
-          
-          {hasLogoError && (
-            <Text style={styles.fallbackText}>McLaughlin Financial Group</Text>
-          )}
-        </View>
-
         <View style={styles.formContainer}>
           <View style={styles.sectionHeader}>
             <Heart size={24} color={Colors.primary} />
@@ -445,6 +411,7 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     paddingHorizontal: 20,
+    paddingTop: 8,
   },
   sectionHeader: {
     flexDirection: 'row',

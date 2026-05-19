@@ -9,11 +9,10 @@ import {
   Alert,
   ActivityIndicator,
   Switch,
-  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, ArrowRight, User, Home, DollarSign } from 'lucide-react-native';
+import { ArrowRight, User, Home, DollarSign, ArrowLeft } from 'lucide-react-native';
 import { Picker } from '@react-native-picker/picker';
 import Colors from '@/constants/colors';
 import {
@@ -23,13 +22,12 @@ import {
   saveAssetMapData,
   PROVINCES,
 } from '@/utils/mappingStorage';
+import AssetMapHeader from '@/components/mapping/AssetMapHeader';
 
 export default function AssetMapPersonal() {
   const router = useRouter();
   const [assetMapData, setAssetMapData] = useState<AssetMapData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLogoLoading, setIsLogoLoading] = useState(true);
-  const [hasLogoError, setHasLogoError] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -130,49 +128,17 @@ export default function AssetMapPersonal() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'right', 'left']}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={handleBack}
-        >
-          <ArrowLeft size={24} color={Colors.primary} />
-        </TouchableOpacity>
-        <View style={styles.headerCenter}>
-          <Text style={styles.headerTitle}>Step 2: Personal</Text>
-          <Text style={styles.headerSubtitle}>Your Information</Text>
-        </View>
-        <View style={styles.placeholder} />
-      </View>
+      <AssetMapHeader
+        step={2}
+        title="Personal"
+        subtitle="Step 2 of 4"
+        onBack={handleBack}
+      />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.logoContainer}>
-          {isLogoLoading && (
-            <ActivityIndicator size="small" color={Colors.primary} style={styles.loader} />
-          )}
-          
-          <Image
-            source={{ 
-              uri: "https://mclaughlinfinancial.ca/wp-content/uploads/2024/11/logo.png",
-              cache: "force-cache" 
-            }}
-            style={[styles.logo, hasLogoError && styles.hidden]}
-            resizeMode="contain"
-            onLoadStart={() => setIsLogoLoading(true)}
-            onLoadEnd={() => setIsLogoLoading(false)}
-            onError={() => {
-              setHasLogoError(true);
-              setIsLogoLoading(false);
-            }}
-          />
-          
-          {hasLogoError && (
-            <Text style={styles.fallbackText}>McLaughlin Financial Group</Text>
-          )}
-        </View>
-
         <View style={styles.formContainer}>
           <View style={styles.sectionHeader}>
             <User size={24} color={Colors.primary} />
@@ -434,6 +400,7 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     paddingHorizontal: 20,
+    paddingTop: 8,
   },
   sectionHeader: {
     flexDirection: 'row',

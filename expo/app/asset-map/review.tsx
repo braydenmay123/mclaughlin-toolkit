@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,23 +7,25 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
-  Image,
-  Platform,
+  Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { 
-  ArrowLeft, 
-  Edit3, 
-  TrendingUp, 
-  Shield, 
+import {
+  Edit3,
+  TrendingUp,
+  Shield,
   AlertTriangle,
   CheckCircle,
   DollarSign,
   PieChart,
   FileText,
   Mail,
-  Download
+  Download,
+  Sparkles,
+  Users,
+  Target,
+  HeartHandshake,
 } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import {
@@ -39,16 +41,41 @@ import {
 } from '@/utils/mappingStorage';
 import { getGateStatus } from '@/utils/gateStorage';
 import { downloadPDF, storeUserAnalytics, EmailData } from '@/utils/emailService';
+import AssetMapHeader from '@/components/mapping/AssetMapHeader';
+
+const formatCurrency = (amount: number): string =>
+  new Intl.NumberFormat('en-CA', {
+    style: 'currency',
+    currency: 'CAD',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+
+const formatPercentage = (value: number | null): string => {
+  if (value === null) return 'N/A';
+  return `${value.toFixed(1)}%`;
+};
+
+const ALLOCATION_COLORS: Record<string, string> = {
+  'cash-savings': '#0EA5E9',
+  tfsa: '#10B981',
+  rrsp: '#6366F1',
+  fhsa: '#F59E0B',
+  resp: '#EC4899',
+  rdsp: '#8B5CF6',
+  'non-registered': '#14B8A6',
+  'real-estate': '#F97316',
+  'business-equity': '#84CC16',
+};
 
 export default function AssetMapReview() {
   const router = useRouter();
   const [assetMapData, setAssetMapData] = useState<AssetMapData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isLogoLoading, setIsLogoLoading] = useState<boolean>(true);
-  const [hasLogoError, setHasLogoError] = useState<boolean>(false);
   const [gateData, setGateData] = useState<any>(null);
   const [isSending, setIsSending] = useState<boolean>(false);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  const scoreAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     loadData();
@@ -72,26 +99,13 @@ export default function AssetMapReview() {
 
   const handleBack = async () => {
     if (!assetMapData) return;
-    
-    const updatedData: AssetMapData = {
-      ...assetMapData,
-      currentStep: 3,
-    };
-    
-    await saveAssetMapData(updatedData);
+    await saveAssetMapData({ ...assetMapData, currentStep: 3 });
     router.back();
   };
 
   const handleEditStep = async (step: number) => {
     if (!assetMapData) return;
-    
-    const updatedData: AssetMapData = {
-      ...assetMapData,
-      currentStep: step,
-    };
-    
-    await saveAssetMapData(updatedData);
-    
+    await saveAssetMapData({ ...assetMapData, currentStep: step });
     switch (step) {
       case 1:
         router.push('/asset-map' as any);
@@ -107,23 +121,61 @@ export default function AssetMapReview() {
     }
   };
 
-  const prepareAdvisorPayload = useMemo(() => {
+  const derived = useMemo(() => {
     if (!assetMapData) return null;
     const { mappingData, personalInfo, insuranceInfo } = assetMapData;
     const totals = calculateTotals(mappingData.categories);
     const savingsRate = calculateSavingsRate(personalInfo, mappingData.categories);
-    const dti = calculateDebtToIncome(personalInfo, mappingData.categories);
+    const debtToIncome = calculateDebtToIncome(personalInfo, mappingData.categories);
     const protection = getProtectionSnapshot(insuranceInfo, personalInfo);
+    const taxConsiderations = getTaxConsiderations(mappingData.categories);
+    const areasOfConcern = getAreasOfConcern(personalInfo, insuranceInfo, mappingData.categories);
+
+    // Financial health score (0-100)
+    let score = 50;
+    if (totals.netWorth > 0) score += 10;
+    if (totals.netWorth > (personalInfo.householdIncome ?? 0) * 2) score += 10;
+    if (savingsRate !== null && savingsRate >= 10) score += 8;
+    if (debtToIncome !== null && debtToIncome < 30) score += 8;
+    if (protection.adequateLife) score += 7;
+    if (protection.adequateDisability) score += 7;
+    if (totals.totalLiabilities === 0) score += 5;
+    if (areasOfConcern.length === 0) score += 5;
+    score -= areasOfConcern.length * 5;
+    score = Math.max(0, Math.min(100, Math.round(score)));
 
     return {
       totals,
       savingsRate,
-      debtToIncome: dti,
+      debtToIncome,
       protection,
-      personalInfo,
-      categories: mappingData.categories,
+      taxConsiderations,
+      areasOfConcern,
+      score,
     };
   }, [assetMapData]);
+
+  useEffect(() => {
+    if (!derived) return;
+    Animated.timing(scoreAnim, {
+      toValue: derived.score,
+      duration: 900,
+      useNativeDriver: false,
+    }).start();
+  }, [derived, scoreAnim]);
+
+  const prepareAdvisorPayload = useMemo(() => {
+    if (!assetMapData || !derived) return null;
+    return {
+      totals: derived.totals,
+      savingsRate: derived.savingsRate,
+      debtToIncome: derived.debtToIncome,
+      protection: derived.protection,
+      personalInfo: assetMapData.personalInfo,
+      categories: assetMapData.mappingData.categories,
+      healthScore: derived.score,
+    };
+  }, [assetMapData, derived]);
 
   const handleSendToAdvisor = async () => {
     if (!gateData?.passed) {
@@ -137,16 +189,12 @@ export default function AssetMapReview() {
       );
       return;
     }
-
     if (!prepareAdvisorPayload) return;
-
     try {
       setIsSending(true);
-      const name = gateData?.name ?? 'Unknown';
-      const email = gateData?.email ?? 'unknown@example.com';
       const payload: EmailData = {
-        name,
-        email,
+        name: gateData?.name ?? 'Unknown',
+        email: gateData?.email ?? 'unknown@example.com',
         calculatorType: 'Asset Map',
         results: prepareAdvisorPayload,
         timestamp: new Date().toISOString(),
@@ -164,11 +212,9 @@ export default function AssetMapReview() {
     if (!prepareAdvisorPayload) return;
     try {
       setIsGenerating(true);
-      const name = gateData?.name ?? 'Client';
-      const email = gateData?.email ?? 'client@example.com';
       await downloadPDF({
-        name,
-        email,
+        name: gateData?.name ?? 'Client',
+        email: gateData?.email ?? 'client@example.com',
         calculatorType: 'Asset Map',
         results: prepareAdvisorPayload,
         timestamp: new Date().toISOString(),
@@ -183,20 +229,18 @@ export default function AssetMapReview() {
       <SafeAreaView style={styles.container} edges={['top', 'right', 'left']}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={Colors.primary} />
-          <Text style={styles.loadingText}>Generating your report...</Text>
+          <Text style={styles.loadingText}>Generating your report…</Text>
         </View>
       </SafeAreaView>
     );
   }
 
-  if (!assetMapData) {
+  if (!assetMapData || !derived) {
     return (
       <SafeAreaView style={styles.container} edges={['top', 'right', 'left']}>
         <View style={styles.errorContainer}>
           <Text style={styles.errorTitle}>Unable to Load Data</Text>
-          <Text style={styles.errorText}>
-            There was an issue loading your information.
-          </Text>
+          <Text style={styles.errorText}>There was an issue loading your information.</Text>
           <TouchableOpacity style={styles.retryButton} onPress={loadData}>
             <Text style={styles.retryButtonText}>Try Again</Text>
           </TouchableOpacity>
@@ -206,250 +250,303 @@ export default function AssetMapReview() {
   }
 
   const { mappingData, personalInfo, insuranceInfo } = assetMapData;
-  const totals = calculateTotals(mappingData.categories);
-  const savingsRate = calculateSavingsRate(personalInfo, mappingData.categories);
-  const debtToIncome = calculateDebtToIncome(personalInfo, mappingData.categories);
-  const protection = getProtectionSnapshot(insuranceInfo, personalInfo);
-  const taxConsiderations = getTaxConsiderations(mappingData.categories);
-  const areasOfConcern = getAreasOfConcern(personalInfo, insuranceInfo, mappingData.categories);
+  const { totals, savingsRate, debtToIncome, protection, taxConsiderations, areasOfConcern, score } = derived;
 
-  const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat('en-CA', {
-      style: 'currency',
-      currency: 'CAD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
+  const scoreColor =
+    score >= 75 ? Colors.success : score >= 50 ? Colors.warning : Colors.error;
+  const scoreLabel =
+    score >= 75 ? 'Strong' : score >= 50 ? 'Building' : 'Needs Attention';
+  const scoreBarWidth = scoreAnim.interpolate({
+    inputRange: [0, 100],
+    outputRange: ['0%', '100%'],
+  });
 
-  const formatPercentage = (value: number | null): string => {
-    if (value === null) return 'N/A';
-    return `${value.toFixed(1)}%`;
-  };
+  // Build allocation segments
+  const assetCats = mappingData.categories.filter(
+    (c) => c.type === 'asset' && c.items.length > 0
+  );
+  const allocationSegments = assetCats
+    .map((c) => {
+      const value = c.items.reduce((s, it) => s + it.amount, 0);
+      return {
+        id: c.id,
+        name: c.name,
+        value,
+        share: totals.totalAssets > 0 ? value / totals.totalAssets : 0,
+        color: ALLOCATION_COLORS[c.id] ?? Colors.primary,
+      };
+    })
+    .filter((s) => s.value > 0)
+    .sort((a, b) => b.value - a.value);
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'right', 'left']}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={handleBack}
-        >
-          <ArrowLeft size={24} color={Colors.primary} />
-        </TouchableOpacity>
-        <View style={styles.headerCenter}>
-          <Text style={styles.headerTitle}>Step 4: Review</Text>
-          <Text style={styles.headerSubtitle}>Financial Map & Report</Text>
-        </View>
-        <View style={styles.placeholder} />
-      </View>
+      <AssetMapHeader
+        step={4}
+        title="Your Financial Map"
+        subtitle="Step 4 of 4"
+        onBack={handleBack}
+      />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.logoContainer}>
-          {isLogoLoading && (
-            <ActivityIndicator size="small" color={Colors.primary} style={styles.loader} />
-          )}
-          
-          <Image
-            source={{ 
-              uri: "https://mclaughlinfinancial.ca/wp-content/uploads/2024/11/logo.png",
-              cache: "force-cache" as any,
-            }}
-            style={[styles.logo, hasLogoError && styles.hidden]}
-            resizeMode="contain"
-            onLoadStart={() => setIsLogoLoading(true)}
-            onLoadEnd={() => setIsLogoLoading(false)}
-            onError={() => {
-              setHasLogoError(true);
-              setIsLogoLoading(false);
-            }}
-          />
-          
-          {hasLogoError && (
-            <Text style={styles.fallbackText}>McLaughlin Financial Group</Text>
-          )}
+        {/* Health Score Hero */}
+        <View style={styles.scoreCard}>
+          <View style={styles.scoreTopRow}>
+            <View style={[styles.scoreIcon, { backgroundColor: `${scoreColor}1A` }]}>
+              <Sparkles size={20} color={scoreColor} />
+            </View>
+            <Text style={styles.scoreLabel}>Financial Health Score</Text>
+          </View>
+          <View style={styles.scoreNumberRow}>
+            <Text style={[styles.scoreNumber, { color: scoreColor }]}>{score}</Text>
+            <Text style={styles.scoreDenom}>/100</Text>
+            <View style={[styles.scoreBadge, { backgroundColor: `${scoreColor}1A` }]}>
+              <Text style={[styles.scoreBadgeText, { color: scoreColor }]}>
+                {scoreLabel}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.scoreTrack}>
+            <Animated.View
+              style={[
+                styles.scoreFill,
+                { width: scoreBarWidth, backgroundColor: scoreColor },
+              ]}
+            />
+          </View>
+          <Text style={styles.scoreCaption}>
+            Based on net worth, savings rate, debt-to-income, and protection coverage.
+          </Text>
         </View>
 
-        {/* Summary Tiles */}
-        <View style={styles.summaryContainer}>
-          <Text style={styles.summaryTitle}>Financial Overview</Text>
-          <View style={styles.summaryGrid}>
-            <View style={styles.summaryCard}>
-              <DollarSign size={24} color={Colors.primary} />
-              <Text style={styles.summaryLabel}>Net Worth</Text>
-              <Text style={[
-                styles.summaryValue,
-                totals.netWorth >= 0 ? styles.positiveValue : styles.negativeValue
-              ]}>
-                {formatCurrency(totals.netWorth)}
+        {/* Key Metrics */}
+        <View style={styles.metricsContainer}>
+          <View style={styles.metricCard}>
+            <DollarSign size={18} color={Colors.primary} />
+            <Text style={styles.metricLabel}>Net Worth</Text>
+            <Text
+              style={[
+                styles.metricValue,
+                totals.netWorth >= 0 ? styles.positive : styles.negative,
+              ]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+            >
+              {formatCurrency(totals.netWorth)}
+            </Text>
+          </View>
+          <View style={styles.metricCard}>
+            <TrendingUp size={18} color={Colors.primary} />
+            <Text style={styles.metricLabel}>Savings Rate</Text>
+            <Text style={styles.metricValue}>{formatPercentage(savingsRate)}</Text>
+          </View>
+          <View style={styles.metricCard}>
+            <PieChart size={18} color={Colors.primary} />
+            <Text style={styles.metricLabel}>Debt-to-Income</Text>
+            <Text
+              style={[
+                styles.metricValue,
+                (debtToIncome || 0) > 40 ? styles.negative : styles.positive,
+              ]}
+            >
+              {formatPercentage(debtToIncome)}
+            </Text>
+          </View>
+          <View style={styles.metricCard}>
+            <Shield size={18} color={Colors.primary} />
+            <Text style={styles.metricLabel}>Protection</Text>
+            <View style={styles.protectionRow}>
+              {protection.adequateLife ? (
+                <CheckCircle size={14} color={Colors.success} />
+              ) : (
+                <AlertTriangle size={14} color={Colors.error} />
+              )}
+              <Text
+                style={[
+                  styles.metricValue,
+                  { fontSize: 14 },
+                  protection.adequateLife ? styles.positive : styles.negative,
+                ]}
+              >
+                {protection.adequateLife ? 'Adequate' : 'Review'}
               </Text>
-            </View>
-            
-            <View style={styles.summaryCard}>
-              <TrendingUp size={24} color={Colors.primary} />
-              <Text style={styles.summaryLabel}>Savings Rate</Text>
-              <Text style={styles.summaryValue}>
-                {formatPercentage(savingsRate)}
-              </Text>
-            </View>
-            
-            <View style={styles.summaryCard}>
-              <PieChart size={24} color={Colors.primary} />
-              <Text style={styles.summaryLabel}>Debt-to-Income</Text>
-              <Text style={[
-                styles.summaryValue,
-                (debtToIncome || 0) > 40 ? styles.negativeValue : styles.positiveValue
-              ]}>
-                {formatPercentage(debtToIncome)}
-              </Text>
-            </View>
-            
-            <View style={styles.summaryCard}>
-              <Shield size={24} color={Colors.primary} />
-              <Text style={styles.summaryLabel}>Protection</Text>
-              <View style={styles.protectionStatus}>
-                {protection.adequateLife ? (
-                  <CheckCircle size={16} color={Colors.success} />
-                ) : (
-                  <AlertTriangle size={16} color={Colors.error} />
-                )}
-                <Text style={[
-                  styles.summaryValue,
-                  { fontSize: 16 },
-                  protection.adequateLife ? styles.positiveValue : styles.negativeValue
-                ]}>
-                  {protection.adequateLife ? 'Adequate' : 'Review Needed'}
-                </Text>
-              </View>
             </View>
           </View>
         </View>
 
-        {/* Tax Considerations */}
-        {taxConsiderations.length > 0 && (
+        {/* Asset Allocation */}
+        {allocationSegments.length > 0 && (
           <View style={styles.sectionContainer}>
             <View style={styles.sectionHeader}>
-              <FileText size={20} color={Colors.primary} />
-              <Text style={styles.sectionTitle}>Tax Considerations</Text>
+              <PieChart size={18} color={Colors.primary} />
+              <Text style={styles.sectionTitle}>Asset Allocation</Text>
             </View>
-            {taxConsiderations.map((consideration, index) => (
-              <View key={index} style={styles.listItem}>
-                <View style={styles.bulletPoint} />
-                <Text style={styles.listItemText}>{consideration}</Text>
+            <View style={styles.allocationCard}>
+              <View style={styles.allocationBar}>
+                {allocationSegments.map((seg, idx) => (
+                  <View
+                    key={seg.id}
+                    style={{
+                      flex: seg.share,
+                      backgroundColor: seg.color,
+                      borderTopLeftRadius: idx === 0 ? 8 : 0,
+                      borderBottomLeftRadius: idx === 0 ? 8 : 0,
+                      borderTopRightRadius:
+                        idx === allocationSegments.length - 1 ? 8 : 0,
+                      borderBottomRightRadius:
+                        idx === allocationSegments.length - 1 ? 8 : 0,
+                    }}
+                  />
+                ))}
               </View>
-            ))}
+              <View style={styles.allocationLegend}>
+                {allocationSegments.map((seg) => (
+                  <View key={seg.id} style={styles.allocationLegendRow}>
+                    <View style={[styles.allocationDot, { backgroundColor: seg.color }]} />
+                    <Text style={styles.allocationName}>{seg.name}</Text>
+                    <Text style={styles.allocationShare}>
+                      {(seg.share * 100).toFixed(0)}%
+                    </Text>
+                    <Text style={styles.allocationValue}>
+                      {formatCurrency(seg.value)}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </View>
           </View>
         )}
+
+        {/* Visual Map - quadrant style */}
+        <View style={styles.sectionContainer}>
+          <View style={styles.sectionHeader}>
+            <Target size={18} color={Colors.primary} />
+            <Text style={styles.sectionTitle}>Snapshot</Text>
+          </View>
+          <View style={styles.quadrant}>
+            <MapTile
+              icon={<Users size={18} color={Colors.primary} />}
+              title="Household"
+              primary={
+                personalInfo.age
+                  ? `Age ${personalInfo.age}${personalInfo.hasSpouse && personalInfo.spouseAge ? ` · Spouse ${personalInfo.spouseAge}` : ''}`
+                  : 'Add age'
+              }
+              secondary={
+                personalInfo.householdIncome
+                  ? `${formatCurrency(personalInfo.householdIncome)} income`
+                  : personalInfo.dependents > 0
+                  ? `${personalInfo.dependents} dependents`
+                  : 'No income set'
+              }
+            />
+            <MapTile
+              icon={<DollarSign size={18} color={Colors.success} />}
+              title="Assets"
+              primary={formatCurrency(totals.totalAssets)}
+              secondary={`${assetCats.length} account types`}
+              accent={Colors.success}
+            />
+            <MapTile
+              icon={<HeartHandshake size={18} color={Colors.warning} />}
+              title="Protection"
+              primary={
+                insuranceInfo.lifeType !== 'none'
+                  ? `${insuranceInfo.lifeType.toUpperCase()} Life`
+                  : 'No life cover'
+              }
+              secondary={
+                insuranceInfo.disabilityBenefit
+                  ? `${formatCurrency(insuranceInfo.disabilityBenefit)}/mo disability`
+                  : 'No disability'
+              }
+              accent={Colors.warning}
+            />
+            <MapTile
+              icon={<Target size={18} color={Colors.info} />}
+              title="Goals"
+              primary={
+                personalInfo.targetRetirementAge
+                  ? `Retire at ${personalInfo.targetRetirementAge}`
+                  : 'Set retirement age'
+              }
+              secondary={
+                personalInfo.targetRetirementIncome
+                  ? `${formatCurrency(personalInfo.targetRetirementIncome)} target`
+                  : 'No income target'
+              }
+              accent={Colors.info}
+            />
+          </View>
+        </View>
 
         {/* Areas of Concern */}
         {areasOfConcern.length > 0 && (
           <View style={styles.sectionContainer}>
             <View style={styles.sectionHeader}>
-              <AlertTriangle size={20} color={Colors.error} />
-              <Text style={[styles.sectionTitle, { color: Colors.error }]}>Areas of Concern</Text>
+              <AlertTriangle size={18} color={Colors.error} />
+              <Text style={[styles.sectionTitle, { color: Colors.error }]}>
+                Areas of Concern
+              </Text>
             </View>
-            {areasOfConcern.map((concern, index) => (
-              <View key={index} style={styles.listItem}>
-                <AlertTriangle size={16} color={Colors.error} />
-                <Text style={styles.listItemText}>{concern}</Text>
-              </View>
-            ))}
+            <View style={styles.concernCard}>
+              {areasOfConcern.map((concern, index) => (
+                <View key={index} style={styles.concernItem}>
+                  <View style={styles.concernIcon}>
+                    <AlertTriangle size={14} color={Colors.error} />
+                  </View>
+                  <Text style={styles.concernText}>{concern}</Text>
+                </View>
+              ))}
+            </View>
           </View>
         )}
 
-        {/* Visual Map */}
-        <View style={styles.sectionContainer}>
-          <View style={styles.sectionHeader}>
-            <PieChart size={20} color={Colors.primary} />
-            <Text style={styles.sectionTitle}>Financial Map</Text>
-          </View>
-          
-          <View style={styles.mapContainer}>
-            <View style={styles.mapSection}>
-              <Text style={styles.mapSectionTitle}>Household</Text>
-              <View style={styles.mapCard}>
-                <Text style={styles.mapCardText}>
-                  {personalInfo.age ? `Age ${personalInfo.age}` : 'Age not provided'}
-                  {personalInfo.hasSpouse && personalInfo.spouseAge ? ` • Spouse ${personalInfo.spouseAge}` : ''}
-                  {personalInfo.dependents > 0 ? ` • ${personalInfo.dependents} dependents` : ''}
-                </Text>
-                <Text style={styles.mapCardSubtext}>
-                  {personalInfo.householdIncome ? `${formatCurrency(personalInfo.householdIncome)} income` : 'Income not provided'}
-                </Text>
-              </View>
+        {/* Tax Considerations */}
+        {taxConsiderations.length > 0 && (
+          <View style={styles.sectionContainer}>
+            <View style={styles.sectionHeader}>
+              <FileText size={18} color={Colors.primary} />
+              <Text style={styles.sectionTitle}>Tax Considerations</Text>
             </View>
-
-            <View style={styles.mapConnector} />
-
-            <View style={styles.mapSection}>
-              <Text style={styles.mapSectionTitle}>Assets</Text>
-              <View style={styles.mapCard}>
-                <Text style={styles.mapCardText}>{formatCurrency(totals.totalAssets)}</Text>
-                <Text style={styles.mapCardSubtext}>
-                  {mappingData.categories.filter(cat => cat.type === 'asset' && cat.items.length > 0).length} account types
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.mapConnector} />
-
-            <View style={styles.mapSection}>
-              <Text style={styles.mapSectionTitle}>Protection</Text>
-              <View style={styles.mapCard}>
-                <Text style={styles.mapCardText}>
-                  {insuranceInfo.lifeType !== 'none' ? 'Life Insurance' : 'No Life Insurance'}
-                </Text>
-                <Text style={styles.mapCardSubtext}>
-                  {insuranceInfo.disabilityBenefit ? `$${insuranceInfo.disabilityBenefit}/mo disability` : 'No disability coverage'}
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.mapConnector} />
-
-            <View style={styles.mapSection}>
-              <Text style={styles.mapSectionTitle}>Goals</Text>
-              <View style={styles.mapCard}>
-                <Text style={styles.mapCardText}>
-                  {personalInfo.targetRetirementAge ? `Retire at ${personalInfo.targetRetirementAge}` : 'No retirement age set'}
-                </Text>
-                <Text style={styles.mapCardSubtext}>
-                  {personalInfo.targetRetirementIncome ? `${formatCurrency(personalInfo.targetRetirementIncome)} target` : 'No income target'}
-                </Text>
-              </View>
+            <View style={styles.tipsCard}>
+              {taxConsiderations.map((consideration, index) => (
+                <View key={index} style={styles.tipItem}>
+                  <View style={styles.tipBullet} />
+                  <Text style={styles.tipText}>{consideration}</Text>
+                </View>
+              ))}
             </View>
           </View>
-        </View>
+        )}
 
         {/* Edit Sections */}
         <View style={styles.sectionContainer}>
           <View style={styles.sectionHeader}>
-            <Edit3 size={20} color={Colors.primary} />
+            <Edit3 size={18} color={Colors.primary} />
             <Text style={styles.sectionTitle}>Edit Information</Text>
           </View>
-          
           <View style={styles.editButtonsContainer}>
             <TouchableOpacity
               style={styles.editButton}
               onPress={() => handleEditStep(1)}
             >
-              <Text style={styles.editButtonText}>Edit Finances</Text>
+              <Text style={styles.editButtonText}>Finances</Text>
             </TouchableOpacity>
-            
             <TouchableOpacity
               style={styles.editButton}
               onPress={() => handleEditStep(2)}
             >
-              <Text style={styles.editButtonText}>Edit Personal</Text>
+              <Text style={styles.editButtonText}>Personal</Text>
             </TouchableOpacity>
-            
             <TouchableOpacity
               style={styles.editButton}
               onPress={() => handleEditStep(3)}
             >
-              <Text style={styles.editButtonText}>Edit Insurance</Text>
+              <Text style={styles.editButtonText}>Insurance</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -457,37 +554,59 @@ export default function AssetMapReview() {
 
       <View style={styles.navigationFooter}>
         <TouchableOpacity
-          style={styles.backNavButton}
-          onPress={handleBack}
-          testID="assetMapBack"
+          style={[styles.secondaryButton, isGenerating && styles.disabledBtn]}
+          onPress={handleDownloadPDF}
+          disabled={isGenerating}
+          testID="assetMapDownloadPDF"
         >
-          <ArrowLeft size={20} color={Colors.primary} />
-          <Text style={styles.backNavButtonText}>Back</Text>
+          <Download size={18} color={Colors.primary} />
+          <Text style={styles.secondaryButtonText}>
+            {isGenerating ? 'Preparing…' : 'PDF'}
+          </Text>
         </TouchableOpacity>
-        
-        <View style={styles.actionsRow}>
-          <TouchableOpacity
-            style={[styles.secondaryButton, isGenerating && styles.disabledBtn]}
-            onPress={handleDownloadPDF}
-            disabled={isGenerating}
-            testID="assetMapDownloadPDF"
-          >
-            <Download size={18} color={Colors.primary} />
-            <Text style={styles.secondaryButtonText}>{isGenerating ? 'Preparing…' : 'Download PDF'}</Text>
-          </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.sendButton, isSending && styles.disabledBtn]}
-            onPress={handleSendToAdvisor}
-            disabled={isSending}
-            testID="assetMapSendAdvisor"
-          >
-            <Mail size={20} color={Colors.background} />
-            <Text style={styles.sendButtonText}>{isSending ? 'Sending…' : 'Send to Advisor'}</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          style={[styles.sendButton, isSending && styles.disabledBtn]}
+          onPress={handleSendToAdvisor}
+          disabled={isSending}
+          testID="assetMapSendAdvisor"
+        >
+          <Mail size={18} color={Colors.background} />
+          <Text style={styles.sendButtonText}>
+            {isSending ? 'Sending…' : 'Send to Advisor'}
+          </Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
+  );
+}
+
+function MapTile({
+  icon,
+  title,
+  primary,
+  secondary,
+  accent,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  primary: string;
+  secondary: string;
+  accent?: string;
+}) {
+  return (
+    <View style={[styles.mapTile, accent ? { borderTopColor: accent, borderTopWidth: 3 } : null]}>
+      <View style={styles.mapTileHeader}>
+        {icon}
+        <Text style={styles.mapTileTitle}>{title}</Text>
+      </View>
+      <Text style={styles.mapTilePrimary} numberOfLines={2}>
+        {primary}
+      </Text>
+      <Text style={styles.mapTileSecondary} numberOfLines={2}>
+        {secondary}
+      </Text>
+    </View>
   );
 }
 
@@ -496,271 +615,317 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.backgroundAlt,
   },
-  header: {
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 24,
+  },
+  scoreCard: {
+    marginTop: -14,
+    marginHorizontal: 20,
+    backgroundColor: Colors.backgroundCard,
+    borderRadius: 20,
+    padding: 20,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    marginBottom: 20,
+  },
+  scoreTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: Colors.background,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
+    gap: 10,
+    marginBottom: 8,
   },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.backgroundGray,
+  scoreIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  headerCenter: {
-    flex: 1,
-    alignItems: 'center',
-    paddingHorizontal: 16,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: Colors.primary,
-  },
-  headerSubtitle: {
-    fontSize: 14,
+  scoreLabel: {
+    fontSize: 13,
+    fontWeight: '600' as const,
     color: Colors.textSecondary,
-    marginTop: 2,
+    letterSpacing: 0.3,
+    textTransform: 'uppercase' as const,
   },
-  placeholder: {
-    width: 40,
+  scoreNumberRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 6,
+    marginBottom: 14,
   },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: 20,
+  scoreNumber: {
+    fontSize: 56,
+    fontWeight: '800' as const,
+    letterSpacing: -2,
+    lineHeight: 56,
   },
-  logoContainer: {
-    alignItems: 'center',
-    marginTop: 24,
-    marginBottom: 20,
-    position: 'relative',
-    height: 50,
-  },
-  loader: {
-    position: 'absolute',
-    top: 15,
-  },
-  logo: {
-    width: 200,
-    height: 50,
-  },
-  hidden: {
-    display: 'none',
-  },
-  fallbackText: {
+  scoreDenom: {
     fontSize: 18,
-    fontWeight: '700',
-    color: Colors.primary,
-    letterSpacing: 0.5,
+    color: Colors.textMuted,
+    fontWeight: '600' as const,
+    marginBottom: 6,
   },
-  summaryContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 32,
+  scoreBadge: {
+    marginLeft: 'auto',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+    marginBottom: 6,
   },
-  summaryTitle: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: Colors.primary,
-    textAlign: 'center',
-    marginBottom: 20,
-    letterSpacing: -0.5,
+  scoreBadgeText: {
+    fontSize: 13,
+    fontWeight: '700' as const,
   },
-  summaryGrid: {
+  scoreTrack: {
+    height: 8,
+    backgroundColor: Colors.borderLight,
+    borderRadius: 4,
+    overflow: 'hidden',
+    marginBottom: 12,
+  },
+  scoreFill: {
+    height: '100%',
+    borderRadius: 4,
+  },
+  scoreCaption: {
+    fontSize: 12,
+    color: Colors.textMuted,
+    lineHeight: 18,
+  },
+  metricsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    paddingHorizontal: 20,
+    gap: 10,
+    marginBottom: 24,
   },
-  summaryCard: {
-    backgroundColor: Colors.backgroundCard,
-    borderRadius: 16,
-    padding: 16,
-    alignItems: 'center',
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 6,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
+  metricCard: {
     flex: 1,
     minWidth: '45%',
+    backgroundColor: Colors.backgroundCard,
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
   },
-  summaryLabel: {
+  metricLabel: {
     fontSize: 12,
     color: Colors.textSecondary,
+    fontWeight: '500' as const,
     marginTop: 8,
     marginBottom: 4,
-    fontWeight: '500',
   },
-  summaryValue: {
+  metricValue: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '800' as const,
+    color: Colors.primary,
     letterSpacing: -0.3,
   },
-  positiveValue: {
-    color: Colors.success,
-  },
-  negativeValue: {
-    color: Colors.error,
-  },
-  protectionStatus: {
+  positive: { color: Colors.success },
+  negative: { color: Colors.error },
+  protectionRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
   },
   sectionContainer: {
     paddingHorizontal: 20,
-    marginBottom: 32,
+    marginBottom: 24,
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
     gap: 8,
+    marginBottom: 12,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 17,
+    fontWeight: '700' as const,
     color: Colors.primary,
     letterSpacing: -0.3,
   },
-  listItem: {
+  allocationCard: {
+    backgroundColor: Colors.backgroundCard,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+  },
+  allocationBar: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 12,
+    height: 14,
+    borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: Colors.borderLight,
+    marginBottom: 16,
+  },
+  allocationLegend: {
+    gap: 10,
+  },
+  allocationLegendRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  allocationDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  allocationName: {
+    flex: 1,
+    fontSize: 14,
+    color: Colors.primary,
+    fontWeight: '600' as const,
+  },
+  allocationShare: {
+    fontSize: 13,
+    color: Colors.textMuted,
+    fontWeight: '600' as const,
+    width: 38,
+    textAlign: 'right',
+  },
+  allocationValue: {
+    fontSize: 13,
+    color: Colors.text,
+    fontWeight: '700' as const,
+    width: 80,
+    textAlign: 'right',
+  },
+  quadrant: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  mapTile: {
+    flex: 1,
+    minWidth: '45%',
+    backgroundColor: Colors.backgroundCard,
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+  },
+  mapTileHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  mapTileTitle: {
+    fontSize: 12,
+    color: Colors.textMuted,
+    fontWeight: '600' as const,
+    letterSpacing: 0.4,
+    textTransform: 'uppercase' as const,
+  },
+  mapTilePrimary: {
+    fontSize: 15,
+    fontWeight: '700' as const,
+    color: Colors.primary,
+    marginBottom: 4,
+    letterSpacing: -0.2,
+  },
+  mapTileSecondary: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    lineHeight: 16,
+  },
+  concernCard: {
+    backgroundColor: Colors.errorLight,
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#FBCFCF',
     gap: 12,
   },
-  bulletPoint: {
+  concernItem: {
+    flexDirection: 'row',
+    gap: 10,
+    alignItems: 'flex-start',
+  },
+  concernIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  concernText: {
+    flex: 1,
+    fontSize: 14,
+    color: Colors.text,
+    lineHeight: 20,
+  },
+  tipsCard: {
+    backgroundColor: Colors.backgroundCard,
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    gap: 10,
+  },
+  tipItem: {
+    flexDirection: 'row',
+    gap: 10,
+    alignItems: 'flex-start',
+  },
+  tipBullet: {
     width: 6,
     height: 6,
     borderRadius: 3,
     backgroundColor: Colors.primary,
-    marginTop: 8,
+    marginTop: 7,
   },
-  listItemText: {
+  tipText: {
     flex: 1,
-    fontSize: 15,
-    color: Colors.textSecondary,
-    lineHeight: 22,
-  },
-  mapContainer: {
-    backgroundColor: Colors.backgroundCard,
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
-  },
-  mapSection: {
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  mapSectionTitle: {
     fontSize: 14,
-    fontWeight: '600',
-    color: Colors.primary,
-    marginBottom: 8,
-  },
-  mapCard: {
-    backgroundColor: Colors.accentLight,
-    borderRadius: 12,
-    padding: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: Colors.accent,
-    minWidth: 200,
-  },
-  mapCardText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.primary,
-    textAlign: 'center',
-  },
-  mapCardSubtext: {
-    fontSize: 12,
     color: Colors.textSecondary,
-    textAlign: 'center',
-    marginTop: 4,
-  },
-  mapConnector: {
-    width: 2,
-    height: 16,
-    backgroundColor: Colors.borderLight,
-    alignSelf: 'center',
-    marginBottom: 8,
+    lineHeight: 20,
   },
   editButtonsContainer: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
+    gap: 10,
   },
   editButton: {
+    flex: 1,
     backgroundColor: Colors.backgroundCard,
     borderRadius: 12,
-    paddingHorizontal: 16,
     paddingVertical: 12,
     borderWidth: 1,
     borderColor: Colors.borderLight,
-    flex: 1,
-    minWidth: '30%',
     alignItems: 'center',
   },
   editButtonText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '600' as const,
     color: Colors.primary,
   },
   navigationFooter: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: 10,
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingVertical: 14,
     backgroundColor: Colors.background,
     borderTopWidth: 1,
     borderTopColor: Colors.borderLight,
   },
-  backNavButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
-    gap: 8,
-  },
-  backNavButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.primary,
-  },
-  stepIndicator: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  stepText: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    fontWeight: '500',
-  },
-  actionsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
   secondaryButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: Colors.background,
     paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingVertical: 14,
     borderRadius: 12,
     gap: 8,
     borderWidth: 1,
@@ -768,25 +933,25 @@ const styles = StyleSheet.create({
   },
   secondaryButtonText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700' as const,
     color: Colors.primary,
   },
   sendButton: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.success,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+    justifyContent: 'center',
+    backgroundColor: Colors.primary,
+    paddingVertical: 14,
     borderRadius: 12,
     gap: 8,
   },
-  disabledBtn: {
-    opacity: 0.6,
-  },
+  disabledBtn: { opacity: 0.6 },
   sendButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: '700' as const,
     color: Colors.background,
+    letterSpacing: -0.2,
   },
   loadingContainer: {
     flex: 1,
@@ -806,7 +971,7 @@ const styles = StyleSheet.create({
   },
   errorTitle: {
     fontSize: 24,
-    fontWeight: '700',
+    fontWeight: '700' as const,
     color: Colors.primary,
     marginBottom: 12,
   },
@@ -825,7 +990,7 @@ const styles = StyleSheet.create({
   },
   retryButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600' as const,
     color: Colors.background,
   },
 });
