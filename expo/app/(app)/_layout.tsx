@@ -1,5 +1,3 @@
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
@@ -52,30 +50,16 @@ function SSRAppGroup() {
 }
 
 function ClientAppGroup() {
-  const [loaded, error] = useFonts({
-    ...FontAwesome.font,
-  });
-
-  console.log('Font loading state:', { loaded, error: error?.message });
-
   useEffect(() => {
-    if (error) {
-      console.error('Font loading error:', error);
-    }
-  }, [error]);
-
-  useEffect(() => {
-    let cancelled = false;
     (async () => {
       try {
         await SplashScreen.preventAutoHideAsync();
       } catch {}
-      if (loaded && !cancelled) {
-        try { await SplashScreen.hideAsync(); } catch {}
-      }
+      try {
+        await SplashScreen.hideAsync();
+      } catch {}
     })();
-    return () => { cancelled = true; };
-  }, [loaded]);
+  }, []);
 
   useEffect(() => {
     const handleError = (event: ErrorEvent) => {
@@ -91,24 +75,6 @@ function ClientAppGroup() {
       window.removeEventListener('unhandledrejection', handleUnhandledRejection as EventListener);
     };
   }, []);
-
-  if (error) {
-    console.error('Font error details:', error);
-    return (
-      <View style={errorStyles.container}>
-        <Text style={errorStyles.text}>Error loading fonts</Text>
-        <Text style={errorStyles.details}>{error.message}</Text>
-      </View>
-    );
-  }
-
-  if (!loaded) {
-    return (
-      <View style={errorStyles.container}>
-        <Text style={errorStyles.text}>Loading...</Text>
-      </View>
-    );
-  }
 
   try {
     return (
