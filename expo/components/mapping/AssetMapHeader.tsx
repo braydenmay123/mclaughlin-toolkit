@@ -46,7 +46,11 @@ export default function AssetMapHeader({
           />
         </View>
 
-        <View style={styles.iconBtn}>{right}</View>
+        {right ? (
+          <View style={styles.iconBtn}>{right}</View>
+        ) : (
+          <View style={styles.iconSpacer} />
+        )}
       </View>
 
       <View style={styles.titleBlock}>
@@ -129,6 +133,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.12)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  iconSpacer: {
+    width: 40,
+    height: 40,
   },
   logoWrap: {
     flex: 1,
