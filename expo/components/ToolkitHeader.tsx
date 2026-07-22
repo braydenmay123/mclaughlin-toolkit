@@ -24,10 +24,7 @@ export default function ToolkitHeader() {
       
       <View style={styles.logoContainer}>
         <Image
-          source={{ 
-            uri: "https://mclaughlinfinancial.ca/wp-content/uploads/2024/11/logo.png",
-            cache: "force-cache"
-          }}
+          source={require("@/assets/images/logo.png")}
           style={[styles.logo, hasError && styles.hidden]}
           resizeMode="contain"
           onError={() => setHasError(true)}

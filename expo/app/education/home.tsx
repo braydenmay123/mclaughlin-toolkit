@@ -231,10 +231,8 @@ const educationSections: EducationSection[] = [
 ];
 
 export default function EducationHome() {
-  console.log('EducationHome rendering...');
   const router = useRouter();
   const [showUserInfoModal, setShowUserInfoModal] = useState(true);
-  const [isLogoLoading, setIsLogoLoading] = useState(true);
   const [hasLogoError, setHasLogoError] = useState(false);
 
   const handleUserInfoSubmit = () => {
@@ -270,23 +268,11 @@ export default function EducationHome() {
         </View>
 
         <View style={styles.logoContainer}>
-          {isLogoLoading && (
-            <ActivityIndicator size="small" color={Colors.primary} style={styles.loader} />
-          )}
-          
           <Image
-            source={{ 
-              uri: "https://mclaughlinfinancial.ca/wp-content/uploads/2024/11/logo.png",
-              cache: "force-cache" 
-            }}
+            source={require("@/assets/images/logo.png")}
             style={[styles.logo, hasLogoError && styles.hidden]}
             resizeMode="contain"
-            onLoadStart={() => setIsLogoLoading(true)}
-            onLoadEnd={() => setIsLogoLoading(false)}
-            onError={() => {
-              setHasLogoError(true);
-              setIsLogoLoading(false);
-            }}
+            onError={() => setHasLogoError(true)}
           />
           
           {hasLogoError && (

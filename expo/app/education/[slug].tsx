@@ -760,8 +760,6 @@ export default function EducationChapter() {
     }
     if (Platform.OS !== 'web') {
       Alert.alert('Export', 'Export to PDF coming soon');
-    } else {
-      console.log('Export to PDF coming soon');
     }
   };
 

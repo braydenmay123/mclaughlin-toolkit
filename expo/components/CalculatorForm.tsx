@@ -93,7 +93,7 @@ export default function CalculatorForm() {
     
     // Close the modal and navigate to results immediately
     setUserInfoModalVisible(false);
-    router.push("/(tabs)/results");
+    router.push("/calculator/results");
   };
 
   return (

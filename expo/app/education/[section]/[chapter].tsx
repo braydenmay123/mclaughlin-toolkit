@@ -74,7 +74,6 @@ const chapterData: Record<string, ChapterContent> = {
 export default function ChapterScreen() {
   const router = useRouter();
   const { section, chapter } = useLocalSearchParams();
-  const [isLogoLoading, setIsLogoLoading] = React.useState(true);
   const [hasLogoError, setHasLogoError] = React.useState(false);
 
   const chapterContent = chapterData[chapter as string];
@@ -142,23 +141,11 @@ export default function ChapterScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.logoContainer}>
-          {isLogoLoading && (
-            <ActivityIndicator size="small" color={Colors.primary} style={styles.loader} />
-          )}
-          
           <Image
-            source={{ 
-              uri: "https://mclaughlinfinancial.ca/wp-content/uploads/2024/11/logo.png",
-              cache: "force-cache" 
-            }}
+            source={require("@/assets/images/logo.png")}
             style={[styles.logo, hasLogoError && styles.hidden]}
             resizeMode="contain"
-            onLoadStart={() => setIsLogoLoading(true)}
-            onLoadEnd={() => setIsLogoLoading(false)}
-            onError={() => {
-              setHasLogoError(true);
-              setIsLogoLoading(false);
-            }}
+            onError={() => setHasLogoError(true)}
           />
           
           {hasLogoError && (

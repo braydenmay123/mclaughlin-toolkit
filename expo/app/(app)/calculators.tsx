@@ -1,15 +1,13 @@
-import React, { useState } from "react";
-import { View, StyleSheet, Text, TouchableOpacity, ScrollView, Image, ActivityIndicator } from "react-native";
+import React from "react";
+import { View, StyleSheet, Text, TouchableOpacity, ScrollView, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Href } from "expo-router";
 import { Home, PiggyBank, TrendingUp, BarChart4, DollarSign, Lock, Percent, ChevronRight, Receipt, ShoppingCart } from "lucide-react-native";
 import Colors from "@/constants/colors";
 
 export default function CalculatorsScreen() {
-  console.log('CalculatorsScreen rendering...');
   const router = useRouter();
-  const [isLogoLoading, setIsLogoLoading] = useState(true);
-  const [hasLogoError, setHasLogoError] = useState(false);
+  const [hasLogoError, setHasLogoError] = React.useState(false);
 
   const navigateToCalculator = (route: Href) => {
     router.push(route);
@@ -22,23 +20,11 @@ export default function CalculatorsScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.logoContainer}>
-          {isLogoLoading && (
-            <ActivityIndicator size="small" color={Colors.primary} style={styles.loader} />
-          )}
-          
           <Image
-            source={{ 
-              uri: "https://mclaughlinfinancial.ca/wp-content/uploads/2024/11/logo.png",
-              cache: "force-cache" 
-            }}
+            source={require("@/assets/images/logo.png")}
             style={[styles.logo, hasLogoError && styles.hidden]}
             resizeMode="contain"
-            onLoadStart={() => setIsLogoLoading(true)}
-            onLoadEnd={() => setIsLogoLoading(false)}
-            onError={() => {
-              setHasLogoError(true);
-              setIsLogoLoading(false);
-            }}
+            onError={() => setHasLogoError(true)}
           />
           
           {hasLogoError && (

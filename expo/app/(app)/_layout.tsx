@@ -10,7 +10,6 @@ import { trpc, trpcClient } from "@/lib/trpc";
 const queryClient = new QueryClient();
 
 export default function AppGroupLayout() {
-  console.log('AppGroupLayout initializing...');
   const isSSR = typeof window === 'undefined';
   if (isSSR) return <SSRAppGroup />;
   return <ClientAppGroup />;

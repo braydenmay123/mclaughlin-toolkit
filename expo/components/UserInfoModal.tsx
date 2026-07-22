@@ -44,7 +44,6 @@ export default function UserInfoModal({
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [errors, setErrors] = useState<{ name?: string; email?: string; terms?: string }>({});
-  const [isLogoLoading, setIsLogoLoading] = useState(true);
   const [hasLogoError, setHasLogoError] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
@@ -217,21 +216,11 @@ export default function UserInfoModal({
                 </View>
 
                 <View style={styles.logoContainer}>
-                  {isLogoLoading && <ActivityIndicator size="small" color={Colors.primary} />}
-                  
                   <Image
-                    source={{ 
-                      uri: "https://mclaughlinfinancial.ca/wp-content/uploads/2024/11/logo.png",
-                      cache: "force-cache"
-                    }}
+                    source={require("@/assets/images/logo.png")}
                     style={[styles.logo, hasLogoError && styles.hidden]}
                     resizeMode="contain"
-                    onLoadStart={() => setIsLogoLoading(true)}
-                    onLoadEnd={() => setIsLogoLoading(false)}
-                    onError={() => {
-                      setHasLogoError(true);
-                      setIsLogoLoading(false);
-                    }}
+                    onError={() => setHasLogoError(true)}
                   />
                   
                   {hasLogoError && (

@@ -53,7 +53,7 @@ export default function InvestmentResultsScreen() {
   // Handle PDF download
   const handleDownloadPDF = async () => {
     if (!userInfo) {
-      console.log('No user info available for PDF generation');
+      console.warn('No user info available for PDF generation');
       return;
     }
 

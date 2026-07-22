@@ -63,7 +63,7 @@ export default function ResultsScreen() {
   // Handle PDF download
   const handleDownloadPDF = async () => {
     if (!userInfo) {
-      console.log('No user info available for PDF generation');
+      console.warn('No user info available for PDF generation');
       return;
     }
 
