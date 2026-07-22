@@ -30,22 +30,28 @@ export default function RRSPTaxSavingsScreen() {
   const [effectiveTaxRate, setEffectiveTaxRate] = useState(0);
   const [marginalTaxRate, setMarginalTaxRate] = useState(0);
   
-  // 2025 Federal Tax Brackets
+  // 2026 Federal Tax Brackets
   const federalBrackets = [
-    { min: 0, max: 57375, rate: 0.15 },
-    { min: 57375, max: 114750, rate: 0.205 },
-    { min: 114750, max: 177882, rate: 0.26 },
-    { min: 177882, max: 253414, rate: 0.29 },
-    { min: 253414, max: Infinity, rate: 0.33 }
+    { min: 0, max: 58523, rate: 0.14 },
+    { min: 58523, max: 117045, rate: 0.205 },
+    { min: 117045, max: 181440, rate: 0.26 },
+    { min: 181440, max: 258482, rate: 0.29 },
+    { min: 258482, max: Infinity, rate: 0.33 }
   ];
   
-  // 2025 Ontario Provincial Tax Brackets
+  // 2026 Ontario Provincial Tax Brackets
   const ontarioBrackets = [
-    { min: 0, max: 52886, rate: 0.0505 },
-    { min: 52886, max: 105775, rate: 0.0915 },
-    { min: 105775, max: 150000, rate: 0.1116 },
+    { min: 0, max: 53891, rate: 0.0505 },
+    { min: 53891, max: 107785, rate: 0.0915 },
+    { min: 107785, max: 150000, rate: 0.1116 },
     { min: 150000, max: 220000, rate: 0.1216 },
     { min: 220000, max: Infinity, rate: 0.1316 }
+  ];
+  
+  // 2026 Ontario surtax tiers (applied on top of provincial tax)
+  const ontarioSurtaxTiers = [
+    { threshold: 5818, rate: 0.20 },
+    { threshold: 7446, rate: 0.36 }
   ];
   
   // Calculate tax for a given income and tax brackets
@@ -86,9 +92,20 @@ export default function RRSPTaxSavingsScreen() {
     const fedTaxBefore = calculateTax(taxableBeforeRRSP, federalBrackets);
     const fedTaxAfter = calculateTax(taxableAfterRRSP, federalBrackets);
     
-    // Calculate provincial tax (Ontario)
-    const provTaxBefore = calculateTax(taxableBeforeRRSP, ontarioBrackets);
-    const provTaxAfter = calculateTax(taxableAfterRRSP, ontarioBrackets);
+    // Calculate provincial tax (Ontario) including surtax
+    const provTaxBeforeBase = calculateTax(taxableBeforeRRSP, ontarioBrackets);
+    const provTaxAfterBase = calculateTax(taxableAfterRRSP, ontarioBrackets);
+    
+    let provTaxBefore = provTaxBeforeBase;
+    let provTaxAfter = provTaxAfterBase;
+    for (const tier of ontarioSurtaxTiers) {
+      if (provTaxBeforeBase > tier.threshold) {
+        provTaxBefore += (provTaxBeforeBase - tier.threshold) * tier.rate;
+      }
+      if (provTaxAfterBase > tier.threshold) {
+        provTaxAfter += (provTaxAfterBase - tier.threshold) * tier.rate;
+      }
+    }
     
     // Calculate total tax
     const totalTaxBefore = fedTaxBefore + provTaxBefore;
@@ -126,7 +143,7 @@ export default function RRSPTaxSavingsScreen() {
         <View style={styles.headerContainer}>
           <Text style={styles.title}>RRSP Tax Savings Calculator</Text>
           <Text style={styles.subtitle}>
-            Calculate the tax savings from RRSP contributions based on 2025 tax brackets
+            Calculate the tax savings from RRSP contributions based on 2026 tax brackets
           </Text>
         </View>
         
@@ -163,7 +180,7 @@ export default function RRSPTaxSavingsScreen() {
                 />
               </View>
               <Text style={styles.helperText}>
-                Maximum contribution limit for 2025: $32,490 or 18% of previous year's earned income
+                Maximum contribution limit for 2026: $33,810 or 18% of previous year's earned income
               </Text>
             </View>
             
@@ -285,7 +302,7 @@ export default function RRSPTaxSavingsScreen() {
                 </View>
                 
                 <View style={styles.taxBracketsContainer}>
-                  <Text style={styles.taxBracketsTitle}>2025 Tax Brackets (Ontario)</Text>
+                  <Text style={styles.taxBracketsTitle}>2026 Tax Brackets (Ontario)</Text>
                   
                   <View style={styles.bracketSection}>
                     <Text style={styles.bracketSectionTitle}>Federal Tax Brackets</Text>
@@ -356,7 +373,7 @@ export default function RRSPTaxSavingsScreen() {
                   <View style={styles.tipItem}>
                     <Info size={20} color={Colors.navy} style={styles.tipIcon} />
                     <Text style={styles.tipText}>
-                      You can contribute to your RRSP until March 1, 2026 to claim a deduction for the 2025 tax year.
+                      You can contribute to your RRSP until March 1, 2027 to claim a deduction for the 2026 tax year.
                     </Text>
                   </View>
                   

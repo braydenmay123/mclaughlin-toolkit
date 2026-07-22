@@ -21,7 +21,12 @@ const CONTRIBUTION_LIMITS = {
   2023: 6500,
   2024: 7000,
   2025: 7000,
+  2026: 7000,
 };
+
+// Maximum cumulative TFSA room for someone eligible since 2009.
+// $109,000 as of 2026 (2009–2026: $5,000×4 + $5,500×2 + $10,000 + $5,500×4 + $6,000×4 + $6,500 + $7,000×3).
+export const MAX_CUMULATIVE_TFSA_ROOM_2026 = 109000;
 
 // Calculate cumulative contribution room based on birth year
 export const calculateCumulativeRoom = (birthYear: number, currentYear = new Date().getFullYear()): number => {

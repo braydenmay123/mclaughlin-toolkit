@@ -68,7 +68,7 @@ export default function TaxCalculatorScreen() {
         <Calculator size={48} color="#04233a" />
         <Text style={styles.title}>Federal Income Tax Calculator</Text>
         <Text style={styles.subtitle}>
-          Calculate your federal income tax for 2025
+          Calculate your federal income tax for 2026
         </Text>
       </View>
 
@@ -139,7 +139,7 @@ export default function TaxCalculatorScreen() {
       <View style={styles.infoSection}>
         <Text style={styles.infoTitle}>Tax Calculation Information</Text>
         <Text style={styles.infoText}>
-          • Uses 2025 federal tax brackets only{'\n'}
+          • Uses 2026 federal tax brackets only{'\n'}
           • Provides marginal and average federal tax rates{'\n'}
           • Shows detailed breakdown by federal tax bracket{'\n'}
           • Provincial taxes are not included in calculations

@@ -34,7 +34,7 @@ export default function TFSAAdvisorScreen() {
       // Simulate AI response
       setTimeout(() => {
         const responses = [
-          "That's a great question about TFSAs. The contribution room you have depends on your age and residency status. If you were 18 or older in 2009 and have been a Canadian resident since then, you could have up to $102,000 in total contribution room by 2025.",
+          "That's a great question about TFSAs. The contribution room you have depends on your age and residency status. If you were 18 or older in 2009 and have been a Canadian resident since then, you could have up to $109,000 in total contribution room by 2026.",
           "When it comes to investment strategies for your TFSA, I recommend focusing on growth investments since all gains are tax-free. This makes your TFSA ideal for investments with higher growth potential.",
           "Withdrawals from your TFSA are completely tax-free, and the amount you withdraw gets added back to your contribution room in the following calendar year.",
           "I'd be happy to review your specific situation in more detail. Would you like to schedule a call or meeting to discuss your TFSA strategy?",

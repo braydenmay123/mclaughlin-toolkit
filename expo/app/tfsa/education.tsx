@@ -17,18 +17,18 @@ const educationTopics = [
       
       <h2>Key TFSA Features</h2>
       <p><strong>Tax-free growth:</strong> All investment income earned within a TFSA, including interest, dividends, and capital gains, is completely tax-free.</p>
-      <p><strong>Contribution room:</strong> Each year, the government sets a contribution limit. For 2023, the annual contribution limit is $6,500. For 2024-2025, the limit is $7,000.</p>
-      <p><strong>Cumulative room:</strong> Unused contribution room accumulates and carries forward indefinitely. If you've never contributed to a TFSA and were 18 or older in 2009, you would have $102,000 in contribution room as of 2025.</p>
+      <p><strong>Contribution room:</strong> Each year, the government sets a contribution limit. For 2023, the annual contribution limit is $6,500. For 2024-2026, the limit is $7,000.</p>
+      <p><strong>Cumulative room:</strong> Unused contribution room accumulates and carries forward indefinitely. If you've never contributed to a TFSA and were 18 or older in 2009, you would have $109,000 in contribution room as of 2026.</p>
       <p><strong>Flexibility:</strong> You can withdraw funds from your TFSA at any time without tax consequences. The amount withdrawn is added back to your contribution room in the following calendar year.</p>
       
-      <h2>TFSA Contribution Limits (2009-2025)</h2>
+      <h2>TFSA Contribution Limits (2009-2026)</h2>
       <p>• 2009-2012: $5,000 per year</p>
       <p>• 2013-2014: $5,500 per year</p>
       <p>• 2015: $10,000</p>
       <p>• 2016-2018: $5,500 per year</p>
       <p>• 2019-2022: $6,000 per year</p>
       <p>• 2023: $6,500</p>
-      <p>• 2024-2025: $7,000 per year</p>
+      <p>• 2024-2026: $7,000 per year</p>
       
       <h2>TFSA vs. RRSP</h2>
       <p><strong>TFSA:</strong> Contributions are not tax-deductible, but withdrawals are tax-free.</p>
@@ -101,8 +101,8 @@ const educationTopics = [
       <p>• 2016-2018: $5,500 per year</p>
       <p>• 2019-2022: $6,000 per year</p>
       <p>• 2023: $6,500</p>
-      <p>• 2024-2025: $7,000 per year</p>
-      <p>If you were 18 or older in 2009 and have never contributed, your total contribution room in 2025 would be $102,000.</p>
+      <p>• 2024-2026: $7,000 per year</p>
+      <p>If you were 18 or older in 2009 and have never contributed, your total contribution room in 2026 would be $109,000.</p>
       
       <h2>Lump Sum vs. Regular Contributions</h2>
       <p><strong>Lump sum:</strong> Contributing a large amount at once can maximize time in the market, potentially leading to greater returns.</p>
@@ -234,7 +234,7 @@ const educationTopics = [
       <p>• Contributions are not tax-deductible</p>
       <p>• Withdrawals are always tax-free</p>
       <p>• No restrictions on withdrawal purposes</p>
-      <p>• Annual contribution room of $7,000 (2024-2025)</p>
+      <p>• Annual contribution room of $7,000 (2024-2026)</p>
       <p>• Withdrawn amounts can be recontributed in future years</p>
       
       <p><strong>FHSA:</strong></p>

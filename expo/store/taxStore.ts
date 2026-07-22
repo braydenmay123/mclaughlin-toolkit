@@ -6,13 +6,15 @@ export interface TaxBracket {
   rate: number;
 }
 
+export interface SurtaxTier {
+  threshold: number;
+  rate: number;
+}
+
 export interface ProvincialTaxData {
   name: string;
   brackets: TaxBracket[];
-  surtax?: {
-    threshold: number;
-    rate: number;
-  };
+  surtax?: SurtaxTier | SurtaxTier[];
   healthPremium?: {
     brackets: { min: number; max: number | null; rate: number; }[];
   };
@@ -42,54 +44,57 @@ interface TaxStore {
   resetCalculation: () => void;
 }
 
-// Federal tax brackets for 2025 (indexed with 2.7% increase)
+// Federal tax brackets for 2026 (indexed 2.0%; lowest rate cut to 14%)
 const FEDERAL_BRACKETS: TaxBracket[] = [
-  { min: 0, max: 57375, rate: 0.15 },
-  { min: 57375, max: 114750, rate: 0.205 },
-  { min: 114750, max: 177882, rate: 0.26 },
-  { min: 177882, max: 253414, rate: 0.29 },
-  { min: 253414, max: null, rate: 0.33 }
+  { min: 0, max: 58523, rate: 0.14 },
+  { min: 58523, max: 117045, rate: 0.205 },
+  { min: 117045, max: 181440, rate: 0.26 },
+  { min: 181440, max: 258482, rate: 0.29 },
+  { min: 258482, max: null, rate: 0.33 }
 ];
 
-// Provincial/Territorial tax data for 2025
+// Provincial/Territorial tax data for 2026
 const PROVINCIAL_TAX_DATA: Record<string, ProvincialTaxData> = {
   'BC': {
     name: 'British Columbia',
     brackets: [
-      { min: 0, max: 49279, rate: 0.0506 },
-      { min: 49279, max: 98560, rate: 0.077 },
-      { min: 98560, max: 120094, rate: 0.105 },
-      { min: 120094, max: 162832, rate: 0.1229 },
-      { min: 162832, max: 227091, rate: 0.147 },
-      { min: 227091, max: null, rate: 0.205 }
+      { min: 0, max: 50363, rate: 0.0506 },
+      { min: 50363, max: 100728, rate: 0.077 },
+      { min: 100728, max: 115648, rate: 0.105 },
+      { min: 115648, max: 140430, rate: 0.1229 },
+      { min: 140430, max: 190405, rate: 0.147 },
+      { min: 190405, max: 265545, rate: 0.168 },
+      { min: 265545, max: null, rate: 0.205 }
     ]
   },
   'AB': {
     name: 'Alberta',
     brackets: [
-      { min: 0, max: 151234, rate: 0.10 },
-      { min: 151234, max: 181498, rate: 0.12 },
-      { min: 181498, max: 241664, rate: 0.13 },
-      { min: 241664, max: 302043, rate: 0.14 },
-      { min: 302043, max: null, rate: 0.15 }
+      { min: 0, max: 61200, rate: 0.08 },
+      { min: 61200, max: 154259, rate: 0.10 },
+      { min: 154259, max: 185111, rate: 0.12 },
+      { min: 185111, max: 246813, rate: 0.13 },
+      { min: 246813, max: 370220, rate: 0.14 },
+      { min: 370220, max: null, rate: 0.15 }
     ]
   },
   'ON': {
     name: 'Ontario',
     brackets: [
-      { min: 0, max: 52886, rate: 0.0505 },
-      { min: 52886, max: 105775, rate: 0.0915 },
-      { min: 105775, max: 150000, rate: 0.1116 },
+      { min: 0, max: 53891, rate: 0.0505 },
+      { min: 53891, max: 107785, rate: 0.0915 },
+      { min: 107785, max: 150000, rate: 0.1116 },
       { min: 150000, max: 220000, rate: 0.1216 },
       { min: 220000, max: null, rate: 0.1316 }
     ],
-    surtax: {
-      threshold: 5554,
-      rate: 0.20
-    },
+    surtax: [
+      { threshold: 5818, rate: 0.20 },
+      { threshold: 7446, rate: 0.36 }
+    ],
     healthPremium: {
       brackets: [
-        { min: 0, max: 25000, rate: 0 },
+        { min: 0, max: 20000, rate: 0 },
+        { min: 20000, max: 25000, rate: 0 },
         { min: 25000, max: 36000, rate: 300 },
         { min: 36000, max: 48000, rate: 450 },
         { min: 48000, max: 72000, rate: 600 },
@@ -101,91 +106,98 @@ const PROVINCIAL_TAX_DATA: Record<string, ProvincialTaxData> = {
   'QC': {
     name: 'Quebec',
     brackets: [
-      { min: 0, max: 53255, rate: 0.14 },
-      { min: 53255, max: 106495, rate: 0.19 },
-      { min: 106495, max: 129590, rate: 0.24 },
-      { min: 129590, max: null, rate: 0.2575 }
+      { min: 0, max: 54345, rate: 0.14 },
+      { min: 54345, max: 108680, rate: 0.19 },
+      { min: 108680, max: 132245, rate: 0.24 },
+      { min: 132245, max: null, rate: 0.2575 }
     ]
   },
   'SK': {
     name: 'Saskatchewan',
     brackets: [
-      { min: 0, max: 52057, rate: 0.105 },
-      { min: 52057, max: 148734, rate: 0.125 },
-      { min: 148734, max: null, rate: 0.145 }
+      { min: 0, max: 54532, rate: 0.105 },
+      { min: 54532, max: 155805, rate: 0.125 },
+      { min: 155805, max: null, rate: 0.145 }
     ]
   },
   'MB': {
     name: 'Manitoba',
     brackets: [
-      { min: 0, max: 47000, rate: 0.108 },
-      { min: 47000, max: 100000, rate: 0.1275 },
-      { min: 100000, max: null, rate: 0.174 }
+      { min: 0, max: 47564, rate: 0.108 },
+      { min: 47564, max: 101200, rate: 0.1275 },
+      { min: 101200, max: null, rate: 0.174 }
     ]
   },
   'NB': {
     name: 'New Brunswick',
     brackets: [
-      { min: 0, max: 49958, rate: 0.094 },
-      { min: 49958, max: 99916, rate: 0.14 },
-      { min: 99916, max: 162383, rate: 0.16 },
-      { min: 162383, max: null, rate: 0.195 }
+      { min: 0, max: 52333, rate: 0.094 },
+      { min: 52333, max: 104666, rate: 0.14 },
+      { min: 104666, max: 193861, rate: 0.16 },
+      { min: 193861, max: null, rate: 0.195 }
     ]
   },
   'NS': {
     name: 'Nova Scotia',
     brackets: [
-      { min: 0, max: 29590, rate: 0.0879 },
-      { min: 29590, max: 59180, rate: 0.1495 },
-      { min: 59180, max: 93000, rate: 0.1667 },
-      { min: 93000, max: 150000, rate: 0.175 },
-      { min: 150000, max: null, rate: 0.21 }
+      { min: 0, max: 30995, rate: 0.0879 },
+      { min: 30995, max: 61991, rate: 0.1495 },
+      { min: 61991, max: 97417, rate: 0.1667 },
+      { min: 97417, max: 157124, rate: 0.175 },
+      { min: 157124, max: null, rate: 0.21 }
     ]
   },
   'PE': {
     name: 'Prince Edward Island',
     brackets: [
-      { min: 0, max: 32656, rate: 0.098 },
-      { min: 32656, max: 65312, rate: 0.138 },
-      { min: 65312, max: null, rate: 0.167 }
+      { min: 0, max: 33928, rate: 0.095 },
+      { min: 33928, max: 65820, rate: 0.1347 },
+      { min: 65820, max: 106890, rate: 0.166 },
+      { min: 106890, max: 142250, rate: 0.1762 },
+      { min: 142250, max: 200000, rate: 0.19 },
+      { min: 200000, max: null, rate: 0.20 }
     ]
   },
   'NL': {
     name: 'Newfoundland and Labrador',
     brackets: [
-      { min: 0, max: 43198, rate: 0.087 },
-      { min: 43198, max: 86395, rate: 0.145 },
-      { min: 86395, max: 154244, rate: 0.158 },
-      { min: 154244, max: 215943, rate: 0.178 },
-      { min: 215943, max: null, rate: 0.198 }
+      { min: 0, max: 44678, rate: 0.087 },
+      { min: 44678, max: 89354, rate: 0.145 },
+      { min: 89354, max: 159528, rate: 0.158 },
+      { min: 159528, max: 223340, rate: 0.178 },
+      { min: 223340, max: 285319, rate: 0.198 },
+      { min: 285319, max: 570638, rate: 0.208 },
+      { min: 570638, max: 1141275, rate: 0.213 },
+      { min: 1141275, max: null, rate: 0.218 }
     ]
   },
   'YT': {
     name: 'Yukon',
     brackets: [
-      { min: 0, max: 57375, rate: 0.064 },
-      { min: 57375, max: 114750, rate: 0.09 },
-      { min: 114750, max: 177882, rate: 0.109 },
-      { min: 177882, max: 500000, rate: 0.128 },
+      { min: 0, max: 58523, rate: 0.064 },
+      { min: 58523, max: 117045, rate: 0.09 },
+      { min: 117045, max: 181440, rate: 0.109 },
+      { min: 181440, max: 258482, rate: 0.128 },
+      { min: 258482, max: 500000, rate: 0.15 },
       { min: 500000, max: null, rate: 0.15 }
     ]
   },
   'NT': {
     name: 'Northwest Territories',
     brackets: [
-      { min: 0, max: 50597, rate: 0.059 },
-      { min: 50597, max: 101198, rate: 0.086 },
-      { min: 101198, max: 164525, rate: 0.122 },
-      { min: 164525, max: null, rate: 0.1405 }
+      { min: 0, max: 53003, rate: 0.059 },
+      { min: 53003, max: 106009, rate: 0.086 },
+      { min: 106009, max: 172346, rate: 0.122 },
+      { min: 172346, max: null, rate: 0.1405 }
     ]
   },
   'NU': {
     name: 'Nunavut',
     brackets: [
-      { min: 0, max: 53268, rate: 0.04 },
-      { min: 53268, max: 106537, rate: 0.07 },
-      { min: 106537, max: 173205, rate: 0.09 },
-      { min: 173205, max: null, rate: 0.115 }
+      { min: 0, max: 55801, rate: 0.04 },
+      { min: 55801, max: 111602, rate: 0.07 },
+      { min: 111602, max: 181439, rate: 0.09 },
+      { min: 181439, max: null, rate: 0.115 }
     ]
   }
 };
@@ -272,10 +284,14 @@ export const useTaxStore = create<TaxStore>((set, get) => ({
       }
     }
     
-    // Add Ontario surtax if applicable
-    if (selectedProvince === 'ON' && provincialData.surtax && provincialResult.tax > provincialData.surtax.threshold) {
-      const surtax = (provincialResult.tax - provincialData.surtax.threshold) * provincialData.surtax.rate;
-      totalTax += surtax;
+    // Add Ontario surtax if applicable (supports one or more tiers)
+    if (selectedProvince === 'ON' && provincialData.surtax) {
+      const tiers = Array.isArray(provincialData.surtax) ? provincialData.surtax : [provincialData.surtax];
+      for (const tier of tiers) {
+        if (provincialResult.tax > tier.threshold) {
+          totalTax += (provincialResult.tax - tier.threshold) * tier.rate;
+        }
+      }
     }
     
     const marginalRate = getMarginalRate(adjustedIncome, FEDERAL_BRACKETS, provincialData.brackets);

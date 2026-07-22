@@ -152,7 +152,7 @@ export default function CalculatorsScreen() {
                 </View>
               </View>
               <Text style={styles.calculatorDescription}>
-                Calculate the tax savings from RRSP contributions based on 2025 tax brackets for Ontario residents.
+                Calculate the tax savings from RRSP contributions based on 2026 tax brackets for Ontario residents.
               </Text>
               <View style={styles.calculatorFeatures}>
                 <View style={styles.featureItem}>
@@ -216,11 +216,11 @@ export default function CalculatorsScreen() {
                 </View>
               </View>
               <Text style={styles.calculatorDescription}>
-                Calculate your federal and provincial income tax for 2025 with detailed breakdown by tax bracket.
+                Calculate your federal and provincial income tax for 2026 with detailed breakdown by tax bracket.
               </Text>
               <View style={styles.calculatorFeatures}>
                 <View style={styles.featureItem}>
-                  <Text style={styles.featureText}>2025 Tax Brackets</Text>
+                  <Text style={styles.featureText}>2026 Tax Brackets</Text>
                 </View>
                 <View style={styles.featureItem}>
                   <Text style={styles.featureText}>All Provinces</Text>
