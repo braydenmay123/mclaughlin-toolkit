@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { ArrowRight, User, Home, DollarSign, ArrowLeft } from 'lucide-react-native';
+import { ArrowRight, User, Home, DollarSign, ArrowLeft, Wallet, TrendingUp } from 'lucide-react-native';
 import { Picker } from '@react-native-picker/picker';
 import Colors from '@/constants/colors';
 import {
@@ -230,6 +230,21 @@ export default function AssetMapPersonal() {
           </View>
 
           <View style={styles.inputGroup}>
+            <Text style={styles.label}>Monthly Take-Home Pay (After Tax)</Text>
+            <TextInput
+              style={styles.input}
+              value={personalInfo.monthlyTakeHome?.toString() || ''}
+              onChangeText={(value) => {
+                const monthlyTakeHome = parseInt(value) || undefined;
+                updatePersonalInfo({ monthlyTakeHome });
+              }}
+              placeholder="e.g., 6000"
+              placeholderTextColor={Colors.textMuted}
+              keyboardType="numeric"
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
             <Text style={styles.label}>Province/Territory</Text>
             <View style={styles.pickerContainer}>
               <Picker
@@ -246,6 +261,91 @@ export default function AssetMapPersonal() {
                 ))}
               </Picker>
             </View>
+          </View>
+
+          <View style={styles.sectionHeader}>
+            <Wallet size={24} color={Colors.primary} />
+            <Text style={styles.sectionTitle}>Monthly Cash Flow</Text>
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Essential Monthly Expenses</Text>
+            <TextInput
+              style={styles.input}
+              value={personalInfo.monthlyExpenses?.toString() || ''}
+              onChangeText={(value) => {
+                const monthlyExpenses = parseInt(value) || undefined;
+                updatePersonalInfo({ monthlyExpenses });
+              }}
+              placeholder="Rent, food, utilities, transport"
+              placeholderTextColor={Colors.textMuted}
+              keyboardType="numeric"
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Monthly Debt Payments</Text>
+            <TextInput
+              style={styles.input}
+              value={personalInfo.monthlyDebtPayments?.toString() || ''}
+              onChangeText={(value) => {
+                const monthlyDebtPayments = parseInt(value) || undefined;
+                updatePersonalInfo({ monthlyDebtPayments });
+              }}
+              placeholder="Mortgage, loan, cc minimums"
+              placeholderTextColor={Colors.textMuted}
+              keyboardType="numeric"
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Monthly Savings & Investments</Text>
+            <TextInput
+              style={styles.input}
+              value={personalInfo.monthlySavings?.toString() || ''}
+              onChangeText={(value) => {
+                const monthlySavings = parseInt(value) || undefined;
+                updatePersonalInfo({ monthlySavings });
+              }}
+              placeholder="What you save/invest each month"
+              placeholderTextColor={Colors.textMuted}
+              keyboardType="numeric"
+            />
+          </View>
+
+          <View style={styles.sectionHeader}>
+            <TrendingUp size={24} color={Colors.primary} />
+            <Text style={styles.sectionTitle}>Investment Assumptions</Text>
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Expected Annual Return (%)</Text>
+            <TextInput
+              style={styles.input}
+              value={personalInfo.expectedReturnRate?.toString() || ''}
+              onChangeText={(value) => {
+                const expectedReturnRate = parseFloat(value) || undefined;
+                updatePersonalInfo({ expectedReturnRate });
+              }}
+              placeholder="Default: 6%"
+              placeholderTextColor={Colors.textMuted}
+              keyboardType="decimal-pad"
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Expected Inflation (%)</Text>
+            <TextInput
+              style={styles.input}
+              value={personalInfo.expectedInflationRate?.toString() || ''}
+              onChangeText={(value) => {
+                const expectedInflationRate = parseFloat(value) || undefined;
+                updatePersonalInfo({ expectedInflationRate });
+              }}
+              placeholder="Default: 2.5%"
+              placeholderTextColor={Colors.textMuted}
+              keyboardType="decimal-pad"
+            />
           </View>
 
           <View style={styles.sectionHeader}>

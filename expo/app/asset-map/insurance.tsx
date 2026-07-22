@@ -172,20 +172,36 @@ export default function AssetMapInsurance() {
           </View>
 
           {insuranceInfo.lifeType !== 'none' && (
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Total Life Insurance Coverage (Death Benefit)</Text>
-              <TextInput
-                style={styles.input}
-                value={insuranceInfo.lifeCoverage?.toString() || ''}
-                onChangeText={(value) => {
-                  const lifeCoverage = parseInt(value) || undefined;
-                  updateInsuranceInfo({ lifeCoverage });
-                }}
-                placeholder="Enter total death benefit"
-                placeholderTextColor={Colors.textMuted}
-                keyboardType="numeric"
-              />
-            </View>
+            <>
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Total Life Insurance Coverage (Death Benefit)</Text>
+                <TextInput
+                  style={styles.input}
+                  value={insuranceInfo.lifeCoverage?.toString() || ''}
+                  onChangeText={(value) => {
+                    const lifeCoverage = parseInt(value) || undefined;
+                    updateInsuranceInfo({ lifeCoverage });
+                  }}
+                  placeholder="Enter total death benefit"
+                  placeholderTextColor={Colors.textMuted}
+                  keyboardType="numeric"
+                />
+              </View>
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Monthly Premium (Optional)</Text>
+                <TextInput
+                  style={styles.input}
+                  value={insuranceInfo.lifeMonthlyPremium?.toString() || ''}
+                  onChangeText={(value) => {
+                    const lifeMonthlyPremium = parseFloat(value) || undefined;
+                    updateInsuranceInfo({ lifeMonthlyPremium });
+                  }}
+                  placeholder="e.g., 45"
+                  placeholderTextColor={Colors.textMuted}
+                  keyboardType="decimal-pad"
+                />
+              </View>
+            </>
           )}
 
           <View style={styles.sectionHeader}>
@@ -205,6 +221,21 @@ export default function AssetMapInsurance() {
               placeholder="Enter monthly disability benefit"
               placeholderTextColor={Colors.textMuted}
               keyboardType="numeric"
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Disability Monthly Premium (Optional)</Text>
+            <TextInput
+              style={styles.input}
+              value={insuranceInfo.disabilityMonthlyPremium?.toString() || ''}
+              onChangeText={(value) => {
+                const disabilityMonthlyPremium = parseFloat(value) || undefined;
+                updateInsuranceInfo({ disabilityMonthlyPremium });
+              }}
+              placeholder="e.g., 30"
+              placeholderTextColor={Colors.textMuted}
+              keyboardType="decimal-pad"
             />
           </View>
 
@@ -239,6 +270,21 @@ export default function AssetMapInsurance() {
           </View>
 
           <View style={styles.inputGroup}>
+            <Text style={styles.label}>Critical Illness Monthly Premium (Optional)</Text>
+            <TextInput
+              style={styles.input}
+              value={insuranceInfo.criticalIllnessMonthlyPremium?.toString() || ''}
+              onChangeText={(value) => {
+                const criticalIllnessMonthlyPremium = parseFloat(value) || undefined;
+                updateInsuranceInfo({ criticalIllnessMonthlyPremium });
+              }}
+              placeholder="e.g., 25"
+              placeholderTextColor={Colors.textMuted}
+              keyboardType="decimal-pad"
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
             <View style={styles.switchRow}>
               <Text style={styles.label}>Do you have group benefits through work?</Text>
               <Switch
@@ -249,6 +295,20 @@ export default function AssetMapInsurance() {
               />
             </View>
           </View>
+
+          {insuranceInfo.hasGroupBenefits && (
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Group Benefits Coverage (Optional)</Text>
+              <TextInput
+                style={styles.input}
+                value={insuranceInfo.groupBenefitsCoverage || ''}
+                onChangeText={(groupBenefitsCoverage) => updateInsuranceInfo({ groupBenefitsCoverage })}
+                placeholder="e.g., Dental, $50k life, LTD 60%"
+                placeholderTextColor={Colors.textMuted}
+                multiline
+              />
+            </View>
+          )}
 
           <View style={styles.sectionHeader}>
             <Home size={24} color={Colors.primary} />

@@ -390,6 +390,7 @@ export default function AssetMapFinances() {
         onSave={handleSaveItem}
         item={editingItem}
         categoryName={editingCategoryData?.name || ''}
+        categoryId={editingCategoryData?.id || ''}
         isLiability={editingCategoryData?.type === 'liability'}
       />
     </SafeAreaView>
